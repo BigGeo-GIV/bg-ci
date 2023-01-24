@@ -1,0 +1,238 @@
+name: Continuous Integration
+
+on:
+  workflow_call:
+    secrets:
+      JF_ACCESS_TOKEN:
+        required: true
+
+env:
+  JF_CONAN_URL: https://biggeo.jfrog.io/artifactory/api/conan/conan
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Install clang-format
+      run: pip3 install clang-format>=15.0.6
+
+    - name: clang-format
+      run: cmake -D FORMAT_COMMAND=clang-format -P cmake/lint.cmake
+
+  coverage:
+    needs: [lint]
+    runs-on: ubuntu-22.04
+    if: github.repository_owner == 'BigGeo-GIV'
+
+    env: {CONAN_REVISIONS_ENABLED: 1}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install LCov
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install lcov -q -y
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Install dependencies
+      run: |
+        pip3 install "conan<2"
+        conan profile new default --detect
+        conan profile update settings.compiler.libcxx=libstdc++11 default
+        conan profile update conf.tools.system.package_manager:mode=install default
+        conan profile update conf.tools.system.package_manager:sudo=True default
+        conan remote add bg-conan ${{ env.JF_CONAN_URL }}
+        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
+        conan install . -b missing
+        conan upload "*" --all -r bg-conan -c
+
+    - name: Configure
+      run: cmake --preset=ci-coverage
+
+    - name: Build
+      run: cmake --build build/coverage -j 2
+
+    - name: Test
+      working-directory: build/coverage
+      run: ctest --output-on-failure -j 2
+
+    - name: Process coverage info
+      run: cmake --build build/coverage -t coverage
+
+    - name: Submit to codecov.io
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        file: build/coverage/coverage.info
+        fail_ci_if_error: true
+        verbose: true # optional (default = false)
+
+  sanitize:
+    needs: [lint]
+    runs-on: ubuntu-22.04
+    if: github.repository_owner == 'BigGeo-GIV'
+
+    env: {CONAN_REVISIONS_ENABLED: 1}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Install dependencies
+      run: |
+        pip3 install "conan<2"
+        conan profile new default --detect
+        conan profile update settings.compiler.libcxx=libstdc++11 default
+        conan profile update conf.tools.system.package_manager:mode=install default
+        conan profile update conf.tools.system.package_manager:sudo=True default
+        conan remote add bg-conan ${{ env.JF_CONAN_URL }}
+        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
+        conan install . -b missing
+        conan upload "*" --all -r bg-conan -c
+
+    - name: Install clang 15
+      run: |
+        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
+        chmod +x /opt/llvm.sh
+        sudo /opt/llvm.sh 15
+
+    - name: Configure
+      env: { CC: clang, CXX: clang++-15 }
+      run: cmake --preset=ci-sanitize
+
+    - name: Build
+      run: cmake --build build/sanitize -j 2
+
+    - name: Test
+      working-directory: build/sanitize
+      env:
+        ASAN_OPTIONS: "strict_string_checks=1:\
+          detect_stack_use_after_return=1:\
+          check_initialization_order=1:\
+          strict_init_order=1:\
+          detect_leaks=1"
+        UBSAN_OPTIONS: print_stacktrace=1
+      run: ctest --output-on-failure -j 2
+
+  test:
+    needs: [lint]
+
+    env: {CONAN_REVISIONS_ENABLED: 1}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, windows-2022] # macos-12
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Install clang 15
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
+        chmod +x /opt/llvm.sh
+        sudo /opt/llvm.sh 15
+
+    # TODO macos
+    # - name: Install llvm clang 15
+    #   if: matrix.os == 'macos-12'
+    #   run: |
+    #     brew install llvm
+    #     echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+    #     /usr/local/opt/llvm/bin/clang++ --version
+
+    - name: Install static analyzers
+      if: matrix.os == 'ubuntu-22.04'
+      run: sudo apt-get install cppcheck -y -q
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip3 install "conan<2"
+        conan profile new default --detect
+        if [ ${{ matrix.os }} = ubuntu-22.04 ]; then
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+        fi
+        conan profile update conf.tools.system.package_manager:mode=install default
+        conan profile update conf.tools.system.package_manager:sudo=True default
+        conan remote add bg-conan ${{ env.JF_CONAN_URL }}
+        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
+        conan install . -b missing
+        conan upload "*" --all -r bg-conan -c
+
+    - name: Configure
+      shell: pwsh
+      env: { CC: clang, CXX: clang++ }
+      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+
+    - name: Build
+      run: cmake --build build --config Release -j 2
+
+    - name: Install
+      run: cmake --install build --config Release --prefix prefix
+
+    - name: Test
+      working-directory: build
+      run: ctest --output-on-failure -C Release -j 2
+
+    # TODO better way to handle uploading to conan
+    # github.ref == 'refs/heads/main'
+    - name: Upload to conan
+      if: github.event_name == 'push'
+        && github.repository_owner == 'BigGeo-GIV'
+      run: |
+        conan create . -b missing
+        conan upload "*" --all -r bg-conan -c
+
+  docs:
+    # Deploy docs only when builds succeed
+    needs: [sanitize, test]
+
+    runs-on: ubuntu-22.04
+
+    if: github.ref == 'refs/heads/main'
+      && github.event_name == 'push'
+      && github.repository_owner == 'BigGeo-GIV'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-python@v4
+      with: { python-version: "3.10" }
+
+    - name: Install poxy dependencies
+      run: pip3 install poxy
+
+    - name: Install Doxygen
+      run: |
+        sudo apt-get update -q
+        sudo apt-get install doxygen -q -y
+
+    - name: Build docs
+      run: poxy ./docs/poxy.toml
+
+    - name: Deploy docs
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./html
