@@ -2,12 +2,17 @@ name: Continuous Integration
 
 on:
   workflow_call:
+    inputs:
+      connan_create:
+        required: false
+        default: false
+        type: boolean
     secrets:
       JF_ACCESS_TOKEN:
         required: true
 
 env:
-  JF_CONAN_URL: https://biggeo.jfrog.io/artifactory/api/conan/conan
+  JF_CONAN_URL: https://biggeoci.jfrog.io/artifactory/api/conan/default-conan
 
 jobs:
   lint:
@@ -15,6 +20,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - uses: actions/setup-python@v4
       with: { python-version: "3.8" }
@@ -34,6 +41,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Install LCov
       run: |
@@ -86,6 +95,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Install Python
       uses: actions/setup-python@v4
@@ -141,6 +152,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - name: Install clang 15
       if: matrix.os == 'ubuntu-22.04'
@@ -200,6 +213,7 @@ jobs:
     - name: Upload to conan
       if: github.event_name == 'push'
         && github.repository_owner == 'BigGeo-GIV'
+        && ${{ inputs.connan_create }}
       run: |
         conan create . -b missing
         conan upload "*" --all -r bg-conan -c
@@ -216,6 +230,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: recursive
 
     - uses: actions/setup-python@v4
       with: { python-version: "3.10" }
