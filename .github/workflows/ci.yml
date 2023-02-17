@@ -146,7 +146,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022] # macos-12
+        os: [ubuntu-22.04, windows-2022, macos-12]
 
     runs-on: ${{ matrix.os }}
 
@@ -162,13 +162,12 @@ jobs:
         chmod +x /opt/llvm.sh
         sudo /opt/llvm.sh 15
 
-    # TODO macos
-    # - name: Install llvm clang 15
-    #   if: matrix.os == 'macos-12'
-    #   run: |
-    #     brew install llvm
-    #     echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
-    #     /usr/local/opt/llvm/bin/clang++ --version
+    - name: Install llvm clang 15
+      if: matrix.os == 'macos-12'
+      run: |
+        brew install llvm
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
+        /usr/local/opt/llvm/bin/clang++ --version
 
     - name: Install static analyzers
       if: matrix.os == 'ubuntu-22.04'
@@ -182,6 +181,10 @@ jobs:
       shell: bash
       run: |
         pip3 install "conan<2"
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm/bin/clang
+          export CXX=/usr/local/opt/llvm/bin/clang++
+        fi
         conan profile new default --detect
         if [ ${{ matrix.os }} = ubuntu-22.04 ]; then
           conan profile update settings.compiler.libcxx=libstdc++11 default
@@ -194,9 +197,17 @@ jobs:
         conan upload "*" --all -r bg-conan -c
 
     - name: Configure
-      shell: pwsh
+      shell: bash
       env: { CC: clang, CXX: clang++ }
-      run: cmake "--preset=ci-$("${{ matrix.os }}".split("-")[0])"
+      run: |
+
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm/bin/clang
+          export CXX=/usr/local/opt/llvm/bin/clang++
+        fi
+        osAry=($(echo ${{ matrix.os }} | tr "-" "\n"))
+        os=${osAry[0]}
+        cmake "--preset=ci-${os}"
 
     - name: Build
       run: cmake --build build --config Release -j 2
