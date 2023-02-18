@@ -189,6 +189,10 @@ jobs:
         if [ ${{ matrix.os }} = ubuntu-22.04 ]; then
           conan profile update settings.compiler.libcxx=libstdc++11 default
         fi
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          conan profile update settings.compiler.libcxx=libc++ default
+          conan profile update settings.compiler.cppstd=14 default
+        fi
         conan profile update conf.tools.system.package_manager:mode=install default
         conan profile update conf.tools.system.package_manager:sudo=True default
         conan remote add bg-conan ${{ env.JF_CONAN_URL }}
@@ -200,7 +204,6 @@ jobs:
       shell: bash
       env: { CC: clang, CXX: clang++ }
       run: |
-
         if [ ${{ matrix.os }} = macos-12 ]; then
           export CC=/usr/local/opt/llvm/bin/clang
           export CXX=/usr/local/opt/llvm/bin/clang++
@@ -226,6 +229,10 @@ jobs:
         && github.repository_owner == 'BigGeo-GIV'
         && ${{ inputs.connan_create }}
       run: |
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm/bin/clang
+          export CXX=/usr/local/opt/llvm/bin/clang++
+        fi
         conan create . -b missing
         conan upload "*" --all -r bg-conan -c
 
