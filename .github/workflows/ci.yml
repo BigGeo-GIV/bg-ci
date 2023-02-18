@@ -225,6 +225,7 @@ jobs:
     # TODO better way to handle uploading to conan
     # github.ref == 'refs/heads/main'
     - name: Upload to conan
+      shell: bash
       if: github.event_name == 'push'
         && github.repository_owner == 'BigGeo-GIV'
         && ${{ inputs.connan_create }}
