@@ -1,0 +1,27 @@
+name: "Conan dependencies"
+description: "Gets conan dependencies"
+inputs:
+   JF_ACCESS_TOKEN:
+     required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install dependencies
+      shell: bash
+      run: |
+        pip3 install "conan<2"
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm/bin/clang
+          export CXX=/usr/local/opt/llvm/bin/clang++
+        fi
+        conan profile new default --detect
+        if [ ${{ matrix.os }} = ubuntu-22.04 ]; then
+          conan profile update settings.compiler.libcxx=libstdc++11 default
+        fi
+        conan profile update conf.tools.system.package_manager:mode=install default
+        conan profile update conf.tools.system.package_manager:sudo=True default
+        conan remote add bg-conan ${{ env.JF_CONAN_URL }}
+        conan user -p ${{ inputs.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
+        conan install . -b missing
+        conan upload "*" --all -r bg-conan -c

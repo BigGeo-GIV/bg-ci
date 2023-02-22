@@ -24,7 +24,8 @@ jobs:
         submodules: recursive
 
     - uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      with:
+        python-version: "3.8"
 
     - name: Install clang-format
       run: pip3 install clang-format>=15.0.6
@@ -51,7 +52,8 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+      with:
+        python-version: "3.8"
 
     - name: Install dependencies
       run: |
@@ -177,30 +179,14 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
-    - name: Install dependencies
-      shell: bash
-      run: |
-        pip3 install "conan<2"
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm/bin/clang
-          export CXX=/usr/local/opt/llvm/bin/clang++
-        fi
-        conan profile new default --detect
-        if [ ${{ matrix.os }} = ubuntu-22.04 ]; then
-          conan profile update settings.compiler.libcxx=libstdc++11 default
-        fi
-        conan profile update conf.tools.system.package_manager:mode=install default
-        conan profile update conf.tools.system.package_manager:sudo=True default
-        conan remote add bg-conan ${{ env.JF_CONAN_URL }}
-        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
-        conan install . -b missing
-        conan upload "*" --all -r bg-conan -c
+    - uses: ./.github/actions/conan-dependencies.yml
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
     - name: Configure
       shell: bash
       env: { CC: clang, CXX: clang++ }
       run: |
-
         if [ ${{ matrix.os }} = macos-12 ]; then
           export CC=/usr/local/opt/llvm/bin/clang
           export CXX=/usr/local/opt/llvm/bin/clang++
@@ -220,9 +206,9 @@ jobs:
       run: ctest --output-on-failure -C Release -j 2
 
     # TODO better way to handle uploading to conan
-    # github.ref == 'refs/heads/main'
     - name: Upload to conan
-      if: github.event_name == 'push'
+      if: github.ref == 'refs/heads/main'
+        && github.event_name == 'push'
         && github.repository_owner == 'BigGeo-GIV'
         && ${{ inputs.connan_create }}
       run: |
