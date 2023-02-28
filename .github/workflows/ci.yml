@@ -3,7 +3,7 @@ name: Continuous Integration
 on:
   workflow_call:
     inputs:
-      connan_create:
+      conan_create:
         required: false
         default: false
         type: boolean
@@ -24,8 +24,7 @@ jobs:
         submodules: recursive
 
     - uses: actions/setup-python@v4
-      with:
-        python-version: "3.8"
+      with: { python-version: "3.8" }
 
     - name: Install clang-format
       run: pip3 install clang-format>=15.0.6
@@ -42,8 +41,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      with: { submodules: recursive }
 
     - name: Install LCov
       run: |
@@ -52,20 +50,12 @@ jobs:
 
     - name: Install Python
       uses: actions/setup-python@v4
-      with:
-        python-version: "3.8"
+      with: { python-version: "3.8" }
 
-    - name: Install dependencies
-      run: |
-        pip3 install "conan<2"
-        conan profile new default --detect
-        conan profile update settings.compiler.libcxx=libstdc++11 default
-        conan profile update conf.tools.system.package_manager:mode=install default
-        conan profile update conf.tools.system.package_manager:sudo=True default
-        conan remote add bg-conan ${{ env.JF_CONAN_URL }}
-        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
-        conan install . -b missing
-        conan upload "*" --all -r bg-conan -c
+    - name: Dependencies
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
     - name: Configure
       run: cmake --preset=ci-coverage
@@ -97,24 +87,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      with: { submodules: recursive }
 
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
-    - name: Install dependencies
-      run: |
-        pip3 install "conan<2"
-        conan profile new default --detect
-        conan profile update settings.compiler.libcxx=libstdc++11 default
-        conan profile update conf.tools.system.package_manager:mode=install default
-        conan profile update conf.tools.system.package_manager:sudo=True default
-        conan remote add bg-conan ${{ env.JF_CONAN_URL }}
-        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
-        conan install . -b missing
-        conan upload "*" --all -r bg-conan -c
+    - name: Dependencies
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
     - name: Install clang 15
       run: |
@@ -154,8 +136,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      with: { submodules: recursive }
 
     - name: Install clang 15
       if: matrix.os == 'ubuntu-22.04'
@@ -180,7 +161,7 @@ jobs:
       with: { python-version: "3.8" }
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -192,8 +173,7 @@ jobs:
           export CC=/usr/local/opt/llvm/bin/clang
           export CXX=/usr/local/opt/llvm/bin/clang++
         fi
-        osAry=($(echo ${{ matrix.os }} | tr "-" "\n"))
-        os=${osAry[0]}
+        osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         cmake "--preset=ci-${os}"
 
     - name: Build
@@ -207,14 +187,22 @@ jobs:
       run: ctest --output-on-failure -C Release -j 2
 
     # TODO better way to handle uploading to conan
+    # github.ref == 'refs/heads/main'
     - name: Upload to conan
-      if: github.ref == 'refs/heads/main'
-        && github.event_name == 'push'
+      shell: bash
+      if: github.event_name == 'push'
         && github.repository_owner == 'BigGeo-GIV'
-        && ${{ inputs.connan_create }}
+        && inputs.conan_create
       run: |
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm/bin/clang
+          export CXX=/usr/local/opt/llvm/bin/clang++
+        fi
         conan create . -b missing
-        conan upload "*" --all -r bg-conan -c
+        nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
+        verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
+        nameVer=$(echo ${name}/${ver})
+        conan upload ${nameVer} --all -r bg-conan -c
 
   docs:
     # Deploy docs only when builds succeed
@@ -228,8 +216,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: recursive
+      with: { submodules: recursive }
 
     - uses: actions/setup-python@v4
       with: { python-version: "3.10" }
