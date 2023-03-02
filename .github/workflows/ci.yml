@@ -203,7 +203,7 @@ jobs:
         nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
         verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
         nameVer=$(echo ${name}/${ver})
-        conan upload ${nameVer} --all -r bg-conan -c
+        conan upload ${nameVer} -r bg-conan -c
 
   docs:
     # Deploy docs only when builds succeed
