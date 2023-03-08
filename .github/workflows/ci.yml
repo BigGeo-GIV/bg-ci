@@ -12,7 +12,7 @@ on:
         required: true
 
 env:
-  JF_CONAN_URL: https://biggeoci.jfrog.io/artifactory/api/conan/default-conan
+  JF_CONAN_URL: https://artifactory.biggeo.com/artifactory/api/conan/conan
 
 jobs:
   lint:

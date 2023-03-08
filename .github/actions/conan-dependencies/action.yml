@@ -7,27 +7,19 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Conan cache
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-conan-modules
-      with:
-        path: ~/.conan/data
-        key: host-${{ runner.os }}-target-${{ runner.os }}-${{ hashFiles('conanfile.py') }}
-
     - name: Install Conan dependencies
       shell: bash
       run: |
         pip3 install "conan<2"
-        if [ ${{ matrix.os }} = macos-12 ]; then
+        if [ ${{ runner.os }} = macOS ]; then
           export CC=/usr/local/opt/llvm/bin/clang
           export CXX=/usr/local/opt/llvm/bin/clang++
         fi
         conan profile new default --detect
-        if [ ${{ matrix.os }} = ubuntu-22.04 ]; then
+        if [ ${{ runner.os }} = Linux ]; then
           conan profile update settings.compiler.libcxx=libstdc++11 default
         fi
-        if [ ${{ matrix.os }} = macos-12 ]; then
+        if [ ${{ runner.os }} = macOS ]; then
           conan profile update settings.compiler.libcxx=libc++ default
           conan profile update settings.compiler.cppstd=14 default
         fi
@@ -35,4 +27,5 @@ runs:
         conan profile update conf.tools.system.package_manager:sudo=True default
         conan remote add bg-conan ${{ env.JF_CONAN_URL }}
         conan user -p ${{ inputs.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
-        conan install . -b missing
+        conan install . -b missing -pr:b=default -pr:h=default
+        conan upload * -r bg-conan -c
