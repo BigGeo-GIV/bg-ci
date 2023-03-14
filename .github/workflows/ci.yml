@@ -57,14 +57,15 @@ jobs:
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
-    - name: Install clang 15
+    - name: Install gcc-12
       run: |
-        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
-        chmod +x /opt/llvm.sh
-        sudo /opt/llvm.sh 15
+        sudo apt install gcc-12
+        sudo apt install g++-12
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
+        conan profile update settings.compiler.version=12 default
 
     - name: Configure
-      env: { CC: clang, CXX: clang++-15 }
       run: cmake --preset=ci-coverage
 
     - name: Build
