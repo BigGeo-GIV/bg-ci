@@ -53,7 +53,7 @@ jobs:
       with: { python-version: "3.8" }
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -101,7 +101,7 @@ jobs:
       with: { python-version: "3.8" }
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -164,7 +164,7 @@ jobs:
         /usr/local/opt/llvm/bin/clang++ --version
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
