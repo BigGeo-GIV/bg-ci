@@ -57,7 +57,14 @@ jobs:
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
+    - name: Install clang 15
+      run: |
+        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
+        chmod +x /opt/llvm.sh
+        sudo /opt/llvm.sh 15
+
     - name: Configure
+      env: { CC: clang, CXX: clang++-15 }
       run: cmake --preset=ci-coverage
 
     - name: Build
@@ -138,6 +145,10 @@ jobs:
     - uses: actions/checkout@v3
       with: { submodules: recursive }
 
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
     - name: Install clang 15
       if: matrix.os == 'ubuntu-22.04'
       run: |
@@ -151,14 +162,6 @@ jobs:
         brew install llvm
         echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
         /usr/local/opt/llvm/bin/clang++ --version
-
-    - name: Install static analyzers
-      if: matrix.os == 'ubuntu-22.04'
-      run: sudo apt-get install cppcheck -y -q
-
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
 
     - name: Dependencies
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
@@ -191,7 +194,7 @@ jobs:
     - name: Upload to conan
       shell: bash
       if: github.ref == 'refs/heads/main'
-        && github.event_name == 'push'
+
         && github.repository_owner == 'BigGeo-GIV'
         && inputs.conan_create
       run: |
