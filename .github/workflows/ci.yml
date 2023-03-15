@@ -7,6 +7,10 @@ on:
         required: false
         default: false
         type: boolean
+      test_os_matrix:
+        required: false
+        default: "['ubuntu-22.04', 'windows-2022', 'macos-12']"
+        type: string
     secrets:
       JF_ACCESS_TOKEN:
         required: true
@@ -138,7 +142,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-2022, macos-12]
+        os: ${{ fromJson(inputs.test_os_matrix) }}
 
     runs-on: ${{ matrix.os }}
 
