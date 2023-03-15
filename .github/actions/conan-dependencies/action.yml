@@ -1,8 +1,8 @@
 name: "Conan dependencies"
 description: "Gets conan dependencies"
 inputs:
-   JF_ACCESS_TOKEN:
-     required: true
+  JF_ACCESS_TOKEN:
+    required: true
 
 runs:
   using: "composite"
@@ -21,7 +21,7 @@ runs:
         fi
         if [ ${{ runner.os }} = macOS ]; then
           conan profile update settings.compiler.libcxx=libc++ default
-          conan profile update settings.compiler.cppstd=14 default
+          conan profile update settings.compiler.cppstd=17 default
         fi
         conan profile update conf.tools.system.package_manager:mode=install default
         conan profile update conf.tools.system.package_manager:sudo=True default
