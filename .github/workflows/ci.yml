@@ -53,7 +53,7 @@ jobs:
       with: { python-version: "3.8" }
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -102,7 +102,7 @@ jobs:
       with: { python-version: "3.8" }
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -165,7 +165,7 @@ jobs:
         /usr/local/opt/llvm/bin/clang++ --version
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@workflow-testing
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -195,7 +195,7 @@ jobs:
     - name: Upload to conan
       shell: bash
       if: github.ref == 'refs/heads/main'
-
+        && github.event_name == 'push'
         && github.repository_owner == 'BigGeo-GIV'
         && inputs.conan_create
       run: |
