@@ -20,6 +20,13 @@ jobs:
         token: ${{ secrets.GH_ACCESS }}
         fetch-depth: 2
 
+    - uses: actions/checkout@v3
+      with:
+        repository: BigGeo-GIV/bg-ci
+        ref: workflow-testing
+        path: bg-ci
+        token: ${{ secrets.GH_ACCESS }}
+
     - name: Check for manual version change
       run: |
         if git diff --name-only HEAD^ HEAD | grep version.txt; then
@@ -33,7 +40,7 @@ jobs:
 
     - name: Bump version
       run: |
-        python3 BumpVersion.py
+        python3 bg-ci/BumpVersion.py
         git config --local user.email "benjaminu+ci@vividtheory.com"
         git config --local user.name "version bumper"
         git add .
