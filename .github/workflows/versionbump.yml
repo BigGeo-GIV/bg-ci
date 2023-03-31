@@ -17,6 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        token: ${{ secrets.GH_ACCESS }}
         fetch-depth: 2
 
     - name: Check for manual version change
@@ -45,6 +46,6 @@ jobs:
         github_token: ${{ secrets.GH_ACCESS }}
         branch: ${{ inputs.branch }}
 
-    - env:
-        GH_TOKEN: ${{secrets.GH_ACCESS}}
-      run: gh workflow run ci.yml --ref version-testing
+    # - env:
+    #     GH_TOKEN: ${{secrets.GH_ACCESS}}
+    #   run: gh workflow run ci.yml --ref version-testing
