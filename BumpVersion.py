@@ -1,5 +1,16 @@
 import sys
 
+def msgToIdx(msg):
+    cType = msg.split(":")[0].lower()
+    if cType[-1] == "!" or "BREAKING CHANGE" in msg:
+        return 1 # should be 0, but not doing major versions yet
+    elif "feat" in cType:
+        return 1
+    elif "fix" in cType:
+        return 2
+    else:
+        return 2 # for now always bump patch to make automation easier
+
 def bumpSemVer(semVer, idx):
     semVer[idx] += 1
     i = idx + 1
@@ -20,4 +31,10 @@ def bumpVer(fpath, idx):
         f.writelines(lines)
 
 if __name__ == "__main__":
-    bumpVer("version.txt", int(sys.argv[1]))
+    msg = sys.argv[1]
+    idx = msgToIdx(msg)
+    if idx >= 0:
+        bumpVer("version.txt", idx)
+    else:
+        print("no need to bump version")
+        exit(1)

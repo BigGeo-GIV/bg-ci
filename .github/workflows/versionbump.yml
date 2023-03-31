@@ -40,13 +40,15 @@ jobs:
 
     - name: Bump version
       run: |
-        python3 bg-ci/BumpVersion.py
-        git config --local user.email "benjaminu+ci@vividtheory.com"
-        git config --local user.name "version bumper"
-        git add .
+        git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions"
         prevMsg=$(git log -1 --pretty=%B)
+        cat version.txt
+        python3 bg-ci/BumpVersion.py "${prevMsg}"
+        cat version.txt
+        git add version.txt
         newVer=$(cat version.txt)
-        newMsg="${prevMsg}"" -> ""${newVer}"
+        newMsg="v""${newVer}"" - ""${prevMsg}"
         git commit -m "${newMsg}"
         git pull
 
