@@ -37,7 +37,10 @@ jobs:
         git config --local user.email "benjaminu+ci@vividtheory.com"
         git config --local user.name "version bumper"
         git add .
-        git commit -m "Version bump"
+        prevMsg=$(git log -1 --pretty=%B)
+        newVer=$(cat version.txt)
+        newMsg="${prevMsg}"" -> ""${newVer}"
+        git commit -m "${newMsg}"
         git pull
 
     - name: Push changes
