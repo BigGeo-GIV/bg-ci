@@ -1,0 +1,63 @@
+name: Version Bump
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        required: true
+        type: string
+    secrets:
+      GH_ACCESS:
+        required: true
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GH_ACCESS }}
+        fetch-depth: 2
+
+    - uses: actions/checkout@v3
+      with:
+        repository: BigGeo-GIV/bg-ci
+        ref: main
+        path: bg-ci
+        token: ${{ secrets.GH_ACCESS }}
+
+    - name: Check for manual version change
+      run: |
+        if git diff --name-only HEAD^ HEAD | grep version.txt; then
+          echo version and source changed: aborting
+          exit 1
+        fi
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Bump version
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        prevMsg=$(git log -1 --pretty=%B)
+        cat version.txt
+        python3 bg-ci/BumpVersion.py "${prevMsg}"
+        cat version.txt
+        git add version.txt
+        newVer=$(cat version.txt)
+        newMsg="v""${newVer}"" - ""${prevMsg}"
+        git commit -m "${newMsg}"
+        git pull
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GH_ACCESS }}
+        branch: ${{ inputs.branch }}
+
+    # - env:
+    #     GH_TOKEN: ${{secrets.GH_ACCESS}}
+    #   run: gh workflow run ci.yml --ref version-testing
