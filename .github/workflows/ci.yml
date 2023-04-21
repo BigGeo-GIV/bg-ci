@@ -15,6 +15,13 @@ on:
         required: false
         default: false
         type: boolean
+    secrets:
+      GH_ACCESS:
+        required: true
+      JF_ACCESS_TOKEN:
+        required: true
+      JF_CONAN_URL:
+        required: true
 
 jobs:
   lint:
@@ -37,7 +44,6 @@ jobs:
   coverage:
     needs: [lint]
     runs-on: ubuntu-22.04
-    if: github.repository_owner == 'BigGeo-GIV'
 
     env: {CONAN_REVISIONS_ENABLED: 1}
 
@@ -93,7 +99,6 @@ jobs:
   sanitize:
     needs: [lint]
     runs-on: ubuntu-22.04
-    if: github.repository_owner == 'BigGeo-GIV'
 
     env: {CONAN_REVISIONS_ENABLED: 1}
 
@@ -223,7 +228,6 @@ jobs:
 
     if: github.ref == 'refs/heads/main'
       && github.event_name == 'push'
-      && github.repository_owner == 'BigGeo-GIV'
       && inputs.build_docs
 
     steps:
