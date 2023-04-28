@@ -8,7 +8,7 @@ def msgToIdx(msg):
         return 1
     elif "fix" in cType:
         return 2
-    elif "infra" in cType:
+    elif "infra" in cType or "deps" in cType:
         return -1
     else:
         return 2 # for now always bump if commit didn't match a pattern just to be safe
