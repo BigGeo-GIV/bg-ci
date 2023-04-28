@@ -5,10 +5,15 @@ on:
     secrets:
       GH_ACCESS:
         required: true
+      JF_ACCESS_TOKEN:
+        required: true
+      JF_CONAN_URL:
+        required: true
 
 jobs:
   update-deps:
     runs-on: ubuntu-latest
+    env: {CONAN_REVISIONS_ENABLED: 1}
 
     steps:
     - uses: actions/checkout@v3
@@ -31,7 +36,10 @@ jobs:
         pip3 install "conan<2"
         pip3 install semantic_version
 
-        body=$(python3 bg-ci/UpdateDeps.py)
+        conan remote add bg-conan ${{ secrets.JF_CONAN_URL }}
+        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
+
+        body=$(python3 bg-ci/UpdateDeps.py bg-conan)
         EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
         echo "BODY<<$EOF" >> $GITHUB_OUTPUT
         echo "${body}" >> $GITHUB_OUTPUT
