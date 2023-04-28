@@ -28,17 +28,22 @@ jobs:
         token: ${{ secrets.GH_ACCESS }}
 
     - name: Check for manual version change
+      id: check
       run: |
         if git diff --name-only HEAD^ HEAD | grep version.txt; then
           echo version and source changed: aborting
           exit 1
+        else
+          echo "GO=1" >> $GITHUB_OUTPUT
         fi
 
     - name: Install Python
+      if: steps.commit.check.GO
       uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
     - name: Bump version
+      if: steps.commit.check.GO
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -53,6 +58,7 @@ jobs:
         git pull
 
     - name: Push changes
+      if: steps.commit.check.GO
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GH_ACCESS }}
