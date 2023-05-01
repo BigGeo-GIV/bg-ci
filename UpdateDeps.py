@@ -33,5 +33,5 @@ if __name__ == "__main__":
         deps[n]["current"] = v
         print(f"{n}: {cur} -> {v}")
 
-    json_object = json.dumps(deps, indent=4)
+    json_object = json.dumps(deps, indent=4) + "\n"
     open("dependencies.json", "w").write(json_object)
