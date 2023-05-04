@@ -20,11 +20,9 @@ runs:
         conan profile new default --detect
         if [ ${{ runner.os }} = Linux ]; then
           conan profile update settings.compiler.libcxx=libstdc++11 default
-          conan profile update settings.compiler.version=12 default
         fi
         if [ ${{ runner.os }} = macOS ]; then
           conan profile update settings.compiler.libcxx=libc++ default
-
         fi
         conan profile update settings.compiler.cppstd=20 default
         conan profile update conf.tools.system.package_manager:mode=install default
