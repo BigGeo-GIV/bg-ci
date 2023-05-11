@@ -30,7 +30,7 @@ def bumpVer(fpath, idx):
     semVer = bumpSemVer(semVer, idx)
     lines[0] = ".".join(list(map(str, semVer)))
     with open(fpath, "w") as f:
-        f.writelines(lines)
+        f.writelines(lines[0] + "\n")
 
 if __name__ == "__main__":
     msg = sys.argv[1]
