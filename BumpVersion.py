@@ -39,4 +39,4 @@ if __name__ == "__main__":
         bumpVer("version.txt", idx)
     else:
         print("no need to bump version")
-        exit(1)
+        exit(-1)
