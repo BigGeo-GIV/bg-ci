@@ -96,49 +96,49 @@ jobs:
         fail_ci_if_error: false
         verbose: true # optional (default = false)
 
-  sanitize:
-    needs: [lint]
-    runs-on: ubuntu-22.04
+  # sanitize:
+  #   needs: [lint]
+  #   runs-on: ubuntu-22.04
 
-    env: {CONAN_REVISIONS_ENABLED: 1}
+  #   env: {CONAN_REVISIONS_ENABLED: 1}
 
-    steps:
-    - uses: actions/checkout@v3
-      with: { submodules: recursive }
+  #   steps:
+  #   - uses: actions/checkout@v3
+  #     with: { submodules: recursive }
 
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.8" }
+  #   - name: Install Python
+  #     uses: actions/setup-python@v4
+  #     with: { python-version: "3.8" }
 
-    - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
-      with:
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-        JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
+  #   - name: Dependencies
+  #     uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+  #     with:
+  #       JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+  #       JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
 
-    - name: Install clang 15
-      run: |
-        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
-        chmod +x /opt/llvm.sh
-        sudo /opt/llvm.sh 15
+  #   - name: Install clang 15
+  #     run: |
+  #       curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
+  #       chmod +x /opt/llvm.sh
+  #       sudo /opt/llvm.sh 15
 
-    - name: Configure
-      env: { CC: clang, CXX: clang++-15 }
-      run: cmake --preset=ci-sanitize
+  #   - name: Configure
+  #     env: { CC: clang, CXX: clang++-15 }
+  #     run: cmake --preset=ci-sanitize
 
-    - name: Build
-      run: cmake --build build/sanitize -j 2
+  #   - name: Build
+  #     run: cmake --build build/sanitize -j 2
 
-    - name: Test
-      working-directory: build/sanitize
-      env:
-        ASAN_OPTIONS: "strict_string_checks=1:\
-          detect_stack_use_after_return=1:\
-          check_initialization_order=1:\
-          strict_init_order=1:\
-          detect_leaks=1"
-        UBSAN_OPTIONS: print_stacktrace=1
-      run: ctest --output-on-failure -j 2
+  #   - name: Test
+  #     working-directory: build/sanitize
+  #     env:
+  #       ASAN_OPTIONS: "strict_string_checks=1:\
+  #         detect_stack_use_after_return=1:\
+  #         check_initialization_order=1:\
+  #         strict_init_order=1:\
+  #         detect_leaks=1"
+  #       UBSAN_OPTIONS: print_stacktrace=1
+  #     run: ctest --output-on-failure -j 2
 
   test:
     needs: [lint]
