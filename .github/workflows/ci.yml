@@ -207,7 +207,6 @@ jobs:
       shell: bash
       if: github.ref == 'refs/heads/main'
         && github.event_name == 'push'
-        && github.repository_owner == 'BigGeo-GIV'
         && inputs.conan_create
       run: |
         if [ ${{ matrix.os }} = macos-12 ]; then
