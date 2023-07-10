@@ -39,7 +39,9 @@ jobs:
         conan remote add bg-conan ${{ secrets.JF_CONAN_URL }}
         conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
 
+        python3 bg-ci/UpdateDeps.py bg-conan
         if body=$(python3 bg-ci/UpdateDeps.py bg-conan); then
+          echo TRUE
           echo "GO=1" >> $GITHUB_OUTPUT
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           echo "BODY<<$EOF" >> $GITHUB_OUTPUT
