@@ -17,8 +17,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GH_ACCESS }}
 
     - uses: actions/checkout@v3
       with:
@@ -91,7 +89,7 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git add dependencies.json
         git commit -m "Update dependencies"
-        git pull
+        git push
 
-    - name: Push changes
-      uses: ad-m/github-push-action@master
+    # - name: Push changes
+    #   uses: ad-m/github-push-action@master
