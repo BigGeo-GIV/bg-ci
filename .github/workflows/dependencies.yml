@@ -23,7 +23,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: main
+        ref: workflow-testing
         path: bg-ci
 
     - name: Install Python
@@ -39,7 +39,6 @@ jobs:
         conan remote add bg-conan ${{ secrets.JF_CONAN_URL }}
         conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
 
-        python3 bg-ci/UpdateDeps.py bg-conan
         if body=$(python3 bg-ci/UpdateDeps.py bg-conan); then
           echo TRUE
           echo "GO=1" >> $GITHUB_OUTPUT
@@ -47,13 +46,10 @@ jobs:
           echo "BODY<<$EOF" >> $GITHUB_OUTPUT
           echo "${body}" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
-        else
-          echo ELSE
         fi
 
-
     - name: Comment on PR
-      if: steps.bump.outputs.GO == 1
+      if: steps.bump.outputs.GO
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |

@@ -26,15 +26,12 @@ if __name__ == "__main__":
                 pass
 
     if len(newDeps) == 0:
-        print("I must die")
         exit(1)
 
     for n, v in newDeps.items():
         cur = deps[n]["current"]
         deps[n]["current"] = v
         print(f"{n}: {cur} -> {v}")
-    print("I didn't die?")
-
 
     json_object = json.dumps(deps, indent=4) + "\n"
     open("dependencies.json", "w").write(json_object)

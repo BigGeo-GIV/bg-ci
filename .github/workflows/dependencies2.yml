@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: main
+        ref: workflow-testing
         path: bg-ci
 
     - name: Install Python
@@ -50,7 +50,7 @@ jobs:
         fi
 
     - name: Commit and push updates
-      if: steps.bump.outputs.GO == 1
+      if: steps.bump.outputs.GO
       id: commit
       env:
         GH_TOKEN: ${{ secrets.GH_ACCESS }}
