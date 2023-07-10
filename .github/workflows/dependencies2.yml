@@ -32,18 +32,7 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
-    # - name: Git setup
-    #   id: setup-git
-    #   env:
-    #     GH_TOKEN: ${{ secrets.GH_ACCESS }}
-    #   run: |
-    #     git config --local user.name "github-actions[bot]"
-    #     git config --local user.email "github-actions[bot]@users.noreply.github.com"
-    #     git remote add head ${{ github.repositoryUrl }}
-    #     git fetch head
-    #     git checkout ${{ github.head_ref }}
-
-    - name: Update dependencies
+    - name: Update dependencies script
       id: bump
       run: |
         pip3 install "conan<2"
@@ -52,39 +41,16 @@ jobs:
         conan remote add bg-conan ${{ secrets.JF_CONAN_URL }}
         conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
 
-        body=$(python3 bg-ci/UpdateDeps.py bg-conan)
-        EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-        echo "BODY<<$EOF" >> $GITHUB_OUTPUT
-        echo "${body}" >> $GITHUB_OUTPUT
-        echo "$EOF" >> $GITHUB_OUTPUT
+        if body=$(python3 bg-ci/UpdateDeps.py bg-conan); then
+          echo "GO=1" >> $GITHUB_OUTPUT
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "BODY<<$EOF" >> $GITHUB_OUTPUT
+          echo "${body}" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+        fi
 
-        myDate=$(date +'%Y-%m-%d')
-        echo "DATE=${myDate}" >> $GITHUB_OUTPUT
-
-    # - name: Comment PR
-    #   uses: thollander/actions-comment-pull-request@v2
-    #   with:
-    #     message: |
-    #       Some dependencies in this branch are out of date:
-
-    #       ${{ steps.bump.outputs.BODY}}
-
-    #       If you would like me to update them, please add the "update dependencies" label to this PR.
-
-    #     comment_tag: dependencies
-    # - uses: peter-evans/create-pull-request@v5
-    #   with:
-    #     add-paths: dependencies.json
-    #     commit-message: Update dependencies
-    #     committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-    #     author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-    #     signoff: false
-    #     branch: dependencies-${{ steps.bump.outputs.DATE }}
-    #     delete-branch: true
-    #     title: 'deps: Update dependencies ${{ steps.bump.outputs.DATE }}'
-    #     body: ${{ steps.bump.outputs.BODY }}
-
-    - name: Commit to trigger CI on PR
+    - name: Commit and push updates
+      if: steps.bump.outputs.GO
       id: commit
       env:
         GH_TOKEN: ${{ secrets.GH_ACCESS }}

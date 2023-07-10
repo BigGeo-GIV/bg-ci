@@ -26,7 +26,7 @@ if __name__ == "__main__":
                 pass
 
     if len(newDeps) == 0:
-        exit(0)
+        exit(1)
 
     for n, v in newDeps.items():
         cur = deps[n]["current"]
