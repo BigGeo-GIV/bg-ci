@@ -48,15 +48,15 @@ jobs:
         myDate=$(date +'%Y-%m-%d')
         echo "DATE=${myDate}" >> $GITHUB_OUTPUT
 
-    - name: Comment PR
-      uses: thollander/actions-comment-pull-request@v2
-      with:
-        message: |
-          Some dependencies in this branch are out of date:
+    # - name: Comment PR
+    #   uses: thollander/actions-comment-pull-request@v2
+    #   with:
+    #     message: |
+    #       Some dependencies in this branch are out of date:
 
-          ${{ steps.bump.outputs.BODY}}
+    #       ${{ steps.bump.outputs.BODY}}
 
-          If you would like me to update them, please add the <name> label to this PR.
+    #       If you would like me to update them, please add the <name> label to this PR.
 
     # - uses: peter-evans/create-pull-request@v5
     #   with:
