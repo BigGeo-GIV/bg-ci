@@ -48,34 +48,44 @@ jobs:
         myDate=$(date +'%Y-%m-%d')
         echo "DATE=${myDate}" >> $GITHUB_OUTPUT
 
-    - uses: peter-evans/create-pull-request@v5
+    - name: Comment PR
+      uses: thollander/actions-comment-pull-request@v2
       with:
-        add-paths: dependencies.json
-        commit-message: Update dependencies
-        committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-        author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
-        signoff: false
-        branch: dependencies-${{ steps.bump.outputs.DATE }}
-        delete-branch: true
-        title: 'deps: Update dependencies ${{ steps.bump.outputs.DATE }}'
-        body: ${{ steps.bump.outputs.BODY }}
+        message: |
+          Some dependencies in this branch are out of date:
 
-    - name: Commit to trigger CI on PR
-      id: commit
-      env:
-        GH_TOKEN: ${{ secrets.GH_ACCESS }}
-      run: |
-        if $( git ls-remote --exit-code --heads origin dependencies-${{ steps.bump.outputs.DATE }} > /dev/null); then
-          echo "PUSH=1" >> $GITHUB_OUTPUT
-          git pull origin dependencies-${{ steps.bump.outputs.DATE }}
-          git config --local user.name "github-actions[bot]"
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "Trigger CI"
-        fi
+          ${{ steps.bump.outputs.BODY}}
 
-    - name: Push changes
-      if: steps.commit.outputs.PUSH
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GH_ACCESS }}
-        branch: dependencies-${{ steps.bump.outputs.DATE }}
+          If you would like me to update them, please add the <name> label to this PR.
+
+    # - uses: peter-evans/create-pull-request@v5
+    #   with:
+    #     add-paths: dependencies.json
+    #     commit-message: Update dependencies
+    #     committer: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+    #     author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+    #     signoff: false
+    #     branch: dependencies-${{ steps.bump.outputs.DATE }}
+    #     delete-branch: true
+    #     title: 'deps: Update dependencies ${{ steps.bump.outputs.DATE }}'
+    #     body: ${{ steps.bump.outputs.BODY }}
+
+    # - name: Commit to trigger CI on PR
+    #   id: commit
+    #   env:
+    #     GH_TOKEN: ${{ secrets.GH_ACCESS }}
+    #   run: |
+    #     if $( git ls-remote --exit-code --heads origin dependencies-${{ steps.bump.outputs.DATE }} > /dev/null); then
+    #       echo "PUSH=1" >> $GITHUB_OUTPUT
+    #       git pull origin dependencies-${{ steps.bump.outputs.DATE }}
+    #       git config --local user.name "github-actions[bot]"
+    #       git config --local user.email "github-actions[bot]@users.noreply.github.com"
+    #       git commit --allow-empty -m "Trigger CI"
+    #     fi
+
+    # - name: Push changes
+    #   if: steps.commit.outputs.PUSH
+    #   uses: ad-m/github-push-action@master
+    #   with:
+    #     github_token: ${{ secrets.GH_ACCESS }}
+    #     branch: dependencies-${{ steps.bump.outputs.DATE }}
