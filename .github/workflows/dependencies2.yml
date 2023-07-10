@@ -48,17 +48,17 @@ jobs:
         myDate=$(date +'%Y-%m-%d')
         echo "DATE=${myDate}" >> $GITHUB_OUTPUT
 
-    - name: Comment PR
-      uses: thollander/actions-comment-pull-request@v2
-      with:
-        message: |
-          Some dependencies in this branch are out of date:
+    # - name: Comment PR
+    #   uses: thollander/actions-comment-pull-request@v2
+    #   with:
+    #     message: |
+    #       Some dependencies in this branch are out of date:
 
-          ${{ steps.bump.outputs.BODY}}
+    #       ${{ steps.bump.outputs.BODY}}
 
-          If you would like me to update them, please add the "update dependencies" label to this PR.
+    #       If you would like me to update them, please add the "update dependencies" label to this PR.
 
-        comment_tag: dependencies
+    #     comment_tag: dependencies
     # - uses: peter-evans/create-pull-request@v5
     #   with:
     #     add-paths: dependencies.json
@@ -71,22 +71,19 @@ jobs:
     #     title: 'deps: Update dependencies ${{ steps.bump.outputs.DATE }}'
     #     body: ${{ steps.bump.outputs.BODY }}
 
-    # - name: Commit to trigger CI on PR
-    #   id: commit
-    #   env:
-    #     GH_TOKEN: ${{ secrets.GH_ACCESS }}
-    #   run: |
-    #     if $( git ls-remote --exit-code --heads origin dependencies-${{ steps.bump.outputs.DATE }} > /dev/null); then
-    #       echo "PUSH=1" >> $GITHUB_OUTPUT
-    #       git pull origin dependencies-${{ steps.bump.outputs.DATE }}
-    #       git config --local user.name "github-actions[bot]"
-    #       git config --local user.email "github-actions[bot]@users.noreply.github.com"
-    #       git commit --allow-empty -m "Trigger CI"
-    #     fi
+    - name: Commit to trigger CI on PR
+      id: commit
+      env:
+        GH_TOKEN: ${{ secrets.GH_ACCESS }}
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git add dependencies.json
+        git commit -m "Update dependencies"
 
-    # - name: Push changes
-    #   if: steps.commit.outputs.PUSH
-    #   uses: ad-m/github-push-action@master
-    #   with:
-    #     github_token: ${{ secrets.GH_ACCESS }}
-    #     branch: dependencies-${{ steps.bump.outputs.DATE }}
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GH_ACCESS }}
+        branch: ${{ github.ref }}
