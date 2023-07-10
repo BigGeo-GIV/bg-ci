@@ -1,4 +1,4 @@
-name: Update Dependencies
+name: Check for Dependency Updates
 
 on:
   workflow_call:
@@ -11,7 +11,7 @@ on:
         required: true
 
 jobs:
-  update-deps:
+  check-deps:
     runs-on: ubuntu-latest
     env: {CONAN_REVISIONS_ENABLED: 1}
 
@@ -30,7 +30,7 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
-    - name: Update dependencies
+    - name: Update dependencies script
       id: bump
       run: |
         pip3 install "conan<2"
@@ -45,19 +45,16 @@ jobs:
         echo "${body}" >> $GITHUB_OUTPUT
         echo "$EOF" >> $GITHUB_OUTPUT
 
-        myDate=$(date +'%Y-%m-%d')
-        echo "DATE=${myDate}" >> $GITHUB_OUTPUT
-
-    - name: Comment PR
+    - name: Comment on PR
       uses: thollander/actions-comment-pull-request@v2
       with:
         message: |
-          Some dependencies in this branch are out of date:
+          Hi there, it looks like some dependencies in this branch are out of date.
 
           ${{ steps.bump.outputs.BODY}}
 
           If you would like me to update them, please add the "update dependencies" label to this PR.
-
+          If you don't plan on updating the dependencies, consider setting a specific version in the dependencies.json file.
         comment_tag: dependencies
     # - uses: peter-evans/create-pull-request@v5
     #   with:
