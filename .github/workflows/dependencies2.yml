@@ -50,7 +50,7 @@ jobs:
         fi
 
     - name: Commit and push updates
-      if: steps.bump.outputs.GO
+      if: steps.bump.outputs.GO == 1
       id: commit
       env:
         GH_TOKEN: ${{ secrets.GH_ACCESS }}
@@ -60,6 +60,3 @@ jobs:
         git add dependencies.json
         git commit -m "Update dependencies"
         git push
-
-    # - name: Push changes
-    #   uses: ad-m/github-push-action@master
