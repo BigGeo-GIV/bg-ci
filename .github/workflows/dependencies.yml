@@ -45,7 +45,10 @@ jobs:
           echo "BODY<<$EOF" >> $GITHUB_OUTPUT
           echo "${body}" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
+        else
+          echo ELSE
         fi
+
 
     - name: Comment on PR
       if: steps.bump.outputs.GO == 1
