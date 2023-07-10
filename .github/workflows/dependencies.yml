@@ -46,6 +46,7 @@ jobs:
           echo "${body}" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
         fi
+        echo $GO
 
     - name: Comment on PR
       if: steps.bump.outputs.GO
@@ -56,6 +57,6 @@ jobs:
 
           ${{ steps.bump.outputs.BODY}}
 
-          If you would like me to update them, please add the "update dependencies" label to this PR.
+          If you would like me to update them, please add the "update dependencies" label to this PR.\
           If you don't plan on updating the dependencies, consider setting a specific version in the dependencies.json file.
         comment_tag: dependencies
