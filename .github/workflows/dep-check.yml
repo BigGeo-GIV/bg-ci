@@ -1,0 +1,62 @@
+name: Check for Dependency Updates
+
+on:
+  workflow_call:
+    secrets:
+      GH_ACCESS:
+        required: true
+      JF_ACCESS_TOKEN:
+        required: true
+      JF_CONAN_URL:
+        required: true
+
+jobs:
+  check-deps:
+    runs-on: ubuntu-latest
+    env: {CONAN_REVISIONS_ENABLED: 1}
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GH_ACCESS }}
+
+    - uses: actions/checkout@v3
+      with:
+        repository: BigGeo-GIV/bg-ci
+        ref: main
+        path: bg-ci
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.8" }
+
+    - name: Update dependencies script
+      id: bump
+      run: |
+        pip3 install "conan<2"
+        pip3 install semantic_version
+
+        conan remote add bg-conan ${{ secrets.JF_CONAN_URL }}
+        conan user -p ${{ secrets.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
+
+        if body=$(python3 bg-ci/UpdateDeps.py bg-conan); then
+          echo TRUE
+          echo "GO=1" >> $GITHUB_OUTPUT
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "BODY<<$EOF" >> $GITHUB_OUTPUT
+          echo "${body}" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Comment on PR
+      if: steps.bump.outputs.GO
+      uses: thollander/actions-comment-pull-request@v2
+      with:
+        message: |
+          Hi there, it looks like some dependencies in this branch are out of date.
+
+          ${{ steps.bump.outputs.BODY}}
+
+          If you would like me to update them, please add the "update dependencies" label to this PR.\
+          If you don't plan on updating the dependencies, consider setting a specific version in the dependencies.json file.
+        comment_tag: dependencies
