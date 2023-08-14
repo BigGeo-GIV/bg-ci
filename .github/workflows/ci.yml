@@ -219,6 +219,14 @@ jobs:
         nameVer=$(echo ${name}/${ver})
         conan upload ${nameVer} -r bg-conan -c
 
+    - name: Upload artifacts
+      if: matrix.os == 'ubuntu-22.04'
+      uses: actions/upload-artifact@v3
+      with:
+        name: executable
+        path: |
+          build/ci-unix/bgdummy
+          build/ci-unix/bgdummytest
   docs:
     # Deploy docs only when builds succeed
     needs: [test]
