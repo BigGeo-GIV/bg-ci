@@ -225,8 +225,8 @@ jobs:
       with:
         name: executable
         path: |
-          build/ci-unix/bgdummy
-          build/ci-unix/bgdummytest
+          build/bgdummy
+          build/bgdummytest
   docs:
     # Deploy docs only when builds succeed
     needs: [test]
