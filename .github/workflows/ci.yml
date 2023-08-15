@@ -227,6 +227,18 @@ jobs:
         path: |
           build/bgdummy
           build/bgdummytest
+          
+    - name: Download bg-search Artifact
+      uses: actions/download-artifact@v2.1.1
+      with:
+        # Artifact name
+        name: executable
+        path: ./exec/
+        
+    - name: List directories
+      run: ls
+    
+    
   docs:
     # Deploy docs only when builds succeed
     needs: [test]
