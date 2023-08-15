@@ -233,7 +233,7 @@ jobs:
       with:
         # Artifact name
         name: executable
-        path: ./exec/
+        path: ./Docker/
 
     - name: See variables
       run: |
