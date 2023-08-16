@@ -227,6 +227,7 @@ jobs:
         path: |
           build/bgdummy
           build/bgdummytest
+          build/*.so*
           
     - name: Download bg-search Artifact
       uses: actions/download-artifact@v2.1.1
