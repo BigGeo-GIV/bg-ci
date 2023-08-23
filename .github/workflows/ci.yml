@@ -225,8 +225,8 @@ jobs:
       with:
         name: executable
         path: |
-          build/bgdummy
-          build/bgdummytest
+          build/bgsearch-grpcserver
+          build/bgsearch-grpcdummyclient
           build/*.so*
           
     - name: Download bg-search Artifact
