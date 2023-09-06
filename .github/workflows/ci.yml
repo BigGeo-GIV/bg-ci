@@ -243,6 +243,8 @@ jobs:
     if: inputs.docker_deploy && inputs.store_artifacts
 
     steps:
+      - uses: actions/checkout@v3
+
       - name: Download bg-search Artifact
         uses: actions/download-artifact@v3
         with:
@@ -274,7 +276,7 @@ jobs:
           tags: |
             crbgsearchdevwestus001.azurecr.io/bg-search-test:latest
           #build-args: REACT_APP_ENV=prod
-    
+
   docs:
     # Deploy docs only when builds succeed
     needs: [build-and-test]
