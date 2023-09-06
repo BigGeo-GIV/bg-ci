@@ -15,6 +15,14 @@ on:
         required: false
         default: false
         type: boolean
+      store_artifacts:
+        required: false
+        default: false
+        type: boolean
+      docker_deploy:
+        required: false
+        default: false
+        type: boolean
     secrets:
       GH_ACCESS:
         required: true
@@ -140,7 +148,7 @@ jobs:
   #       UBSAN_OPTIONS: print_stacktrace=1
   #     run: ctest --output-on-failure -j 2
 
-  test:
+  build-and-test:
     needs: [lint]
 
     env: {CONAN_REVISIONS_ENABLED: 1}
@@ -202,7 +210,7 @@ jobs:
       run: ctest --output-on-failure -C Release -j 2
 
     # TODO better way to handle uploading to conan
-    #
+
     - name: Upload to conan
       shell: bash
       if: github.ref == 'refs/heads/main'
@@ -220,51 +228,56 @@ jobs:
         conan upload ${nameVer} -r bg-conan -c
 
     - name: Upload artifacts
-      if: matrix.os == 'ubuntu-22.04'
+      if: inputs.store_artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: executable
-        path: |
-          build/bgsearch-grpcserver
-          build/bgsearch-grpcdummyclient
-          build/*.so*
-          
-    - name: Download bg-search Artifact
-      uses: actions/download-artifact@v2.1.1
-      with:
-        # Artifact name
-        name: executable
-        path: ./Docker/
+        name: ${{ matrix.os }}-executable
+        path: build/
 
-    - name: See variables
-      run: |
-        echo ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SERVER}} ${{secrets.BG_SEARCH_DOCKER_REGISTRY_NAME}} ${{secrets.BG_SEARCH_DOCKER_REGISTRY_PSWD}}
-    
-    - name: See Docker directory
-      run: ls
-    
-    - name: Set up Docker Build
-      uses: docker/setup-buildx-action@v2
-    
-    - name: Docker login
-      uses: docker/login-action@v2
-      with:
+  docker-deploy:
+    # Deploy docker container only when builds succeed
+    # TODO: I have just copied everything Dawood did into here.
+    # Probably we need to generalize it a bit more.
+    needs: [build-and-test]
+    runs-on: ubuntu-22.04
+    if: inputs.docker_deploy && inputs.store_artifacts
+
+    steps:
+      - name: Download bg-search Artifact
+        uses: actions/download-artifact@v3
+        with:
+          # Artifact name
+          name: ubuntu-22.04-executable
+          path: ./Docker/
+
+      - name: See variables
+        run: |
+          echo ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SERVER}} ${{secrets.BG_SEARCH_DOCKER_REGISTRY_NAME}} ${{secrets.BG_SEARCH_DOCKER_REGISTRY_PSWD}}
+
+      - name: See Docker directory
+        run: ls
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v2
+
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
           registry: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SERVER}}
           username: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_NAME}}
           password: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_PSWD}}
-    - name: Build and push bg-search docker image
-      uses: docker/build-push-action@v3
-      with:
+      - name: Build and push bg-search docker image
+        uses: docker/build-push-action@v3
+        with:
           push: true
           context: ./Docker/
           tags: |
-              crbgsearchdevwestus001.azurecr.io/bg-search-test:latest
+            crbgsearchdevwestus001.azurecr.io/bg-search-test:latest
           #build-args: REACT_APP_ENV=prod
-    
     
   docs:
     # Deploy docs only when builds succeed
-    needs: [test]
+    needs: [build-and-test]
 
     runs-on: ubuntu-22.04
 
