@@ -174,7 +174,6 @@ jobs:
         curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
         chmod +x /opt/llvm.sh
         sudo /opt/llvm.sh 15
-        clang++ --version
 
     - name: Install llvm clang 15
       if: matrix.os == 'macos-12'
@@ -191,7 +190,7 @@ jobs:
 
     - name: Configure
       shell: bash
-      env: { CC: clang, CXX: clang++ }
+      env: { CC: clang-15, CXX: clang++-15 }
       run: |
         if [ ${{ matrix.os }} = macos-12 ]; then
           export CC=/usr/local/opt/llvm/bin/clang
