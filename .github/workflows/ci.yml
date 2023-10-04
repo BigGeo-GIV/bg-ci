@@ -168,14 +168,14 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.8" }
 
-    - name: Install clang 15
+    - name: Install clang
       if: matrix.os == 'ubuntu-22.04'
       run: |
         curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
         chmod +x /opt/llvm.sh
-        sudo /opt/llvm.sh 15
+        sudo /opt/llvm.sh 16
 
-    - name: Install llvm clang 15
+    - name: Install llvm clang
       if: matrix.os == 'macos-12'
       run: |
         brew install llvm
@@ -190,7 +190,7 @@ jobs:
 
     - name: Configure
       shell: bash
-      env: { CC: clang-15, CXX: clang++-15 }
+      env: { CC: clang-16, CXX: clang++-16 }
       run: |
         if [ ${{ matrix.os }} = macos-12 ]; then
           export CC=/usr/local/opt/llvm/bin/clang
