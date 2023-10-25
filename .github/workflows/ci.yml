@@ -178,7 +178,7 @@ jobs:
     - name: Install llvm clang
       if: matrix.os == 'macos-12'
       run: |
-        brew install llvm
+        brew install llvm@16
         echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
         /usr/local/opt/llvm/bin/clang++ --version
 
