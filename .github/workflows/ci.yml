@@ -50,7 +50,6 @@ jobs:
       run: cmake -D FORMAT_COMMAND=clang-format -P cmake/lint.cmake
 
   coverage:
-    needs: [lint]
     runs-on: ubuntu-22.04
 
     env: {CONAN_REVISIONS_ENABLED: 1}
@@ -149,8 +148,6 @@ jobs:
   #     run: ctest --output-on-failure -j 2
 
   build-and-test:
-    needs: [lint]
-
     env: {CONAN_REVISIONS_ENABLED: 1}
 
     strategy:
