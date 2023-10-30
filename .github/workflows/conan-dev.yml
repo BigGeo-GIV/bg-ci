@@ -1,0 +1,90 @@
+name: Conan Dev Dependencies
+
+on:
+  workflow_call:
+    secrets:
+      GH_ACCESS:
+        required: true
+      JF_ACCESS_TOKEN:
+        required: true
+      JF_CONAN_URL:
+        required: true
+
+jobs:
+  ubunutu-gcc:
+    env: {CONAN_REVISIONS_ENABLED: 1}
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with: { submodules: recursive }
+
+    - name: Install gcc-12
+      run: |
+        sudo apt install gcc-12
+        sudo apt install g++-12
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
+        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
+
+    - name: Dependencies
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+        JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
+        BUILD_TYPE: RelWithDebInfo
+
+  ubunutu-clang:
+    env: {CONAN_REVISIONS_ENABLED: 1}
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with: { submodules: recursive }
+
+    - name: Install clang-16
+      run: |
+        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
+        chmod +x /opt/llvm.sh
+        sudo /opt/llvm.sh 16
+
+    - name: Dependencies
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      env: { CC: clang-16, CXX: clang++-16 }
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+        JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
+        BUILD_TYPE: RelWithDebInfo
+
+  macos:
+    env: {CONAN_REVISIONS_ENABLED: 1}
+    runs-on: macos-12
+    steps:
+    - uses: actions/checkout@v3
+      with: { submodules: recursive }
+
+    - name: Install llvm clang-16
+      run: |
+        brew install llvm@16
+        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >>  ~/.bash_profile
+        /usr/local/opt/llvm/bin/clang++ --version
+
+    - name: Dependencies
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      env: { CC: /usr/local/opt/llvm/bin/clang, CXX: /usr/local/opt/llvm/bin/clang++ }
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+        JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
+        BUILD_TYPE: RelWithDebInfo
+
+  windows:
+    env: {CONAN_REVISIONS_ENABLED: 1}
+    runs-on: windows-2022
+    steps:
+    - uses: actions/checkout@v3
+      with: { submodules: recursive }
+
+    - name: Dependencies
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+        JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
+        BUILD_TYPE: RelWithDebInfo
