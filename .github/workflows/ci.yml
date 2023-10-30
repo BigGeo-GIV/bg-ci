@@ -176,8 +176,7 @@ jobs:
       if: matrix.os == 'macos-12'
       run: |
         brew install llvm@16
-        echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >> ~/.bash_profile
-        /usr/local/opt/llvm/bin/clang++ --version
+        /usr/local/opt/llvm@16/bin/clang++ --version
 
     - name: Dependencies
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
@@ -190,8 +189,8 @@ jobs:
       env: { CC: clang-16, CXX: clang++-16 }
       run: |
         if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm/bin/clang
-          export CXX=/usr/local/opt/llvm/bin/clang++
+          export CC=/usr/local/opt/llvm@16/bin/clang
+          export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         cmake "--preset=ci-${os}"
@@ -215,8 +214,8 @@ jobs:
         && inputs.conan_create
       run: |
         if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm/bin/clang
-          export CXX=/usr/local/opt/llvm/bin/clang++
+          export CC=/usr/local/opt/llvm@16/bin/clang
+          export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         conan create . -b missing
         nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}

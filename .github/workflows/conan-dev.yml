@@ -65,7 +65,7 @@ jobs:
       run: |
         brew install llvm@16
         echo 'export PATH="/usr/local/opt/llvm/bin:$PATH"' >>  ~/.bash_profile
-        /usr/local/opt/llvm/bin/clang++ --version
+        /usr/local/opt/llvm@16/bin/clang++ --version
 
     - name: Dependencies
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main

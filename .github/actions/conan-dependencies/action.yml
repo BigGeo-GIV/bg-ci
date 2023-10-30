@@ -20,8 +20,8 @@ runs:
       run: |
         pip3 install "conan<2"
         if [ ${{ runner.os }} = macOS ]; then
-          export CC=/usr/local/opt/llvm/bin/clang
-          export CXX=/usr/local/opt/llvm/bin/clang++
+          export CC=/usr/local/opt/llvm@16/bin/clang
+          export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         conan profile new default --detect
         if [ ${{ runner.os }} = Linux ]; then
