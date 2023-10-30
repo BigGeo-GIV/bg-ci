@@ -2,9 +2,15 @@ name: "Conan dependencies"
 description: "Gets conan dependencies"
 inputs:
   JF_ACCESS_TOKEN:
+    description: Access token for conan repo
     required: true
   JF_CONAN_URL:
+    description: URL of conan repo
     required: true
+  BUILD_TYPE:
+    description: CMake Build Type
+    required: false
+    default: Release
 
 runs:
   using: "composite"
@@ -29,5 +35,5 @@ runs:
         conan profile update conf.tools.system.package_manager:sudo=True default
         conan remote add bg-conan ${{ inputs.JF_CONAN_URL }}
         conan user -p ${{ inputs.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
-        conan install . -b missing -pr:b=default -pr:h=default
+        conan install . -s build_type=${{ inputs.BUILD_TYPE }} -b missing -pr:b=default -pr:h=default
         conan upload "*" --all -r bg-conan -c
