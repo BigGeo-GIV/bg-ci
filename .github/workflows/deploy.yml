@@ -74,7 +74,7 @@ jobs:
       run: |
         mkdir -p Docker
         cp -r build/* Docker
-        cat version.txt >> $VERSION
+        echo VERSION=$(cat version.txt) >> $GITHUB_OUTPUT
 
     - name: Set up Docker Build
       uses: docker/setup-buildx-action@v2
