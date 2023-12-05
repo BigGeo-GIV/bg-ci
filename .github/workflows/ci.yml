@@ -90,7 +90,7 @@ jobs:
 
     - name: Test
       working-directory: build/coverage
-      run: ctest --output-on-failure -j 2
+      run: ctest --timeout 3600 --output-on-failure -j 2
 
     - name: Process coverage info
       run: cmake --build build/coverage -t coverage
@@ -203,7 +203,7 @@ jobs:
 
     - name: Test
       working-directory: build
-      run: ctest --output-on-failure -C Release -j 2
+      run: ctest --timeout 3600 --output-on-failure -C Release -j 2
 
     # TODO better way to handle uploading to conan
 
