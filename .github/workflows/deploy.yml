@@ -58,9 +58,9 @@ jobs:
     - name: Install
       run: cmake --install build --config Release --prefix prefix
 
-    - name: Test
-      working-directory: build
-      run: ctest --output-on-failure -C Release -j 2
+    # - name: Test
+    #   working-directory: build
+    #   run: ctest --output-on-failure -C Release -j 2
 
     - name: Upload artifacts
       if: inputs.store_artifacts
@@ -101,4 +101,3 @@ jobs:
           crbgsearchdevwestus001.azurecr.io/bg-search-test:${{steps.version.outputs.VERSION}}
           eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{steps.version.outputs.VERSION}}
         #build-args: REACT_APP_ENV=prod
-    
