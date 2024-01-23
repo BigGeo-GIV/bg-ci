@@ -100,4 +100,5 @@ jobs:
         tags: |
           crbgsearchdevwestus001.azurecr.io/bg-search-test:${{steps.version.outputs.VERSION}}
           eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{steps.version.outputs.VERSION}}
+          eqcqgux-biggeoaws.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/bg_server:${{steps.version.outputs.VERSION}}
         #build-args: REACT_APP_ENV=prod
