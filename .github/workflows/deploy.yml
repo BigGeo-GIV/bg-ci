@@ -82,9 +82,9 @@ jobs:
     - name: Docker login to Azure Registry
       uses: docker/login-action@v2
       with:
-        registry: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SERVER}}
-        username: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_NAME}}
-        password: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_PSWD}}
+        registry: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_SERVER}}
+        username: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_NAME}}
+        password: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_PSWD}}
     - name: Docker login to Snowflake Registry
       uses: docker/login-action@v2
       with:
