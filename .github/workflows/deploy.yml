@@ -29,7 +29,7 @@ jobs:
       schema_name: 'DATA_SCHEMA'
       spec_file: "'biggeo-b.yaml'"
       table_name: "'LAND_NA_LEASE'"
-      geomtype: "'Polygon'"
+      geomtype: "'polygon'"
 
     runs-on: ubuntu-22.04
 
