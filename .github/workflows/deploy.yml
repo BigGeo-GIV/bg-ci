@@ -32,9 +32,6 @@ jobs:
       geomtype: ('Polygon')
 
     runs-on: ubuntu-22.04
-    strategy:
-      matrix: 
-        table: ['TABLE1', 'TABLE2', 'TABLE3','TABLE4', 'TABLE5']
 
     steps:
     - uses: actions/checkout@v3
