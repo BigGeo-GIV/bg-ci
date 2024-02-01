@@ -131,7 +131,7 @@ jobs:
         # Set user role
         snowflake_role: 'ALCYONE_ROLE'
         # List of SQL queries, seperated by ;
-        queries: 'BigGeoDeployment(service_name=>$service_name,compute_pool=>$compute_pool,bg_version=>${{steps.version.outputs.VERSION}},db_name=>$db_name,schema_name=>$schema_name, spec_file => $spec_file, table_name=>$table_name, geomtype => $geomtype)'
+        queries: 'CALL $db_name.$schema_name.BigGeoDeployment(service_name=>$service_name,compute_pool=>$compute_pool,bg_version=>${{steps.version.outputs.VERSION}},db_name=>$db_name,schema_name=>$schema_name, spec_file => $spec_file, table_name=>$table_name, geomtype => $geomtype)'
         # Whether to run the queries sync (default is async)
         # sync: # optional
               
