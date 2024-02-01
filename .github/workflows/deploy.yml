@@ -118,11 +118,13 @@ jobs:
         #build-args: REACT_APP_ENV=prod
         
     - name: Snowflake Query Action
+      id: snowflake
       uses: anecdotes-ai/snowflake-query@v1.2
+      env:
+        bg_version: '${{steps.version.outputs.VERSION}}'
       with:
         # Username for Snowflake DB
         snowflake_username: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_NAME}}
-        bg_version: '${{steps.version.outputs.VERSION}}'
         # Password for Snowflake DB
         snowflake_password: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_PSWD}}
         # Account name for Snowflake DB. Your account name is the full/entire string to the left of snowflakecomputing.com.
@@ -132,7 +134,7 @@ jobs:
         # Set user role
         snowflake_role: 'ALCYONE_ROLE'
         # List of SQL queries, seperated by ;
-        queries: 'CALL ${{env.db_name}}.${{env.schema_name}}.BigGeoDeployment(service_name=>${{env.schema_name}},compute_pool=>${{env.compute_pool}},bg_version=>${{bg_version}},db_name=>${{env.db_name}},schema_name=>${{env.schema_name}}, spec_file => ${{env.spec_file}}, table_name=>${{env.table_name}}, geomtype => [${{env.geomtype}}])'
+        queries: 'CALL ${{env.db_name}}.${{env.schema_name}}.BigGeoDeployment(service_name=>${{env.schema_name}},compute_pool=>${{env.compute_pool}},bg_version=>${{steps.snowflake.env.bg_version}},db_name=>${{env.db_name}},schema_name=>${{env.schema_name}}, spec_file => ${{env.spec_file}}, table_name=>${{env.table_name}}, geomtype => [${{env.geomtype}}])'
         # Whether to run the queries sync (default is async)
         # sync: # optional
               
