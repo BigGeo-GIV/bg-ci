@@ -215,8 +215,9 @@ jobs:
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
+        export CONAN_DEV_PACKAGE=1
         if [ ${{ github.ref }} = refs/heads/main ]; then
-          export CONAN_DEV_PACKAGE=1
+          export CONAN_DEV_PACKAGE=0
         fi
         conan create . -b missing
         nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
