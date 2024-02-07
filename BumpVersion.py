@@ -30,9 +30,10 @@ def bumpSemVerStr(semVerStr, idx):
     return ".".join(list(map(str, semVer)))
 
 if __name__ == "__main__":
-    msg = sys.argv[1]
-    baseName = sys.argv[2]
-    dev = distutils.util.strtobool(sys.argv[3])
+    path = sys.argv[1]
+    msg = sys.argv[2]
+    baseName = sys.argv[3]
+    dev = distutils.util.strtobool(sys.argv[4])
     idx = msgToIdx(msg, not dev)
     if idx < 0:
         print("no need to bump version")
@@ -43,9 +44,9 @@ if __name__ == "__main__":
     else:
         name = baseName
 
-    verJson = json.load(open("version.json"))
+    verJson = json.load(open(path))
     oldVer = verJson[name]
     newVer = bumpSemVerStr(oldVer, idx)
     verJson[name] = newVer
 
-    json.dump(verJson, open("version.json", "w"))
+    json.dump(verJson, open(path, "w"))

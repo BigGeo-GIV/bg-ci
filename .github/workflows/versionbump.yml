@@ -56,9 +56,9 @@ jobs:
           dev=0
         fi
 
-        if python3 bg-ci/BumpVersion.py "${prevMsg}" ${{ inputs.name }} ${dev}; then
+        if python3 bg-ci/BumpVersion.py version.json "${prevMsg}" ${{ inputs.name }} ${dev}; then
           git add version.json
-          newVer=$(python3 bg-ci/GetVersion.py ${{ inputs.name }} ${dev})
+          newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} ${dev})
           newMsg="v""${newVer}"" - ""${prevMsg}"
           git commit -m "${newMsg}"
           git pull
