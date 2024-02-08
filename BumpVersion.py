@@ -2,20 +2,26 @@ import distutils
 import sys
 import json
 
-def msgToIdx(msg, allowMajor):
-    cType = msg.split(":")[0].lower()
-    if cType[-1] == "!" or "BREAKING CHANGE" in msg:
-        if allowMajor:
-            return 0
-        return 1
-    elif "feat" in cType:
-        return 1
-    elif "fix" in cType:
-        return 2
-    elif "infra" in cType or "deps" in cType:
-        return -1
-    else:
-        return 1 # bump minor if commit didn't match a pattern just to be safe
+def commitJsonToIdx(commitJson, allowMajor):
+    minFound = 10
+    for commit in commitJson["commits"]:
+        msg = commit["messageHeadline"]
+
+        cType = msg.split(":")[0].lower()
+        if cType[-1] == "!": # not really working right now: or "BREAKING CHANGE" in msg:
+            if allowMajor:
+                found = 0
+            found = 1
+        elif "feat" in cType:
+            found = 1
+        elif "fix" in cType:
+            found = 2
+        elif "infra" in cType or "deps" in cType:
+            found = 10
+        else:
+            found = 1 # bump minor if commit didn't match a pattern just to be safe
+        minFound = min(minFound, found)
+    return minFound
 
 def bumpSemVerList(semVer, idx):
     semVer[idx] += 1
@@ -31,11 +37,11 @@ def bumpSemVerStr(semVerStr, idx):
 
 if __name__ == "__main__":
     path = sys.argv[1]
-    msg = sys.argv[2]
+    commitJsonPath = sys.argv[2]
     baseName = sys.argv[3]
     dev = distutils.util.strtobool(sys.argv[4])
-    idx = msgToIdx(msg, not dev)
-    if idx < 0:
+    idx = commitJsonToIdx(json.load(open(commitJsonPath)), not dev)
+    if idx == 10:
         print("no need to bump version")
         exit(-1)
 
@@ -49,4 +55,6 @@ if __name__ == "__main__":
     newVer = bumpSemVerStr(oldVer, idx)
     verJson[name] = newVer
 
-    json.dump(verJson, open(path, "w"))
+    out = open(path, "w")
+    json.dump(verJson, out)
+    out.write("\n")
