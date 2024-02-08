@@ -59,6 +59,8 @@ jobs:
 
     - name: Bump version (main PR)
       if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ secrets.GH_ACCESS }}
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
