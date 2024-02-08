@@ -16,6 +16,8 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GH_ACCESS }}
     steps:
+      - uses: actions/checkout@v3
+
       - shell: bash
         run: |
           git config --local user.name "github-actions[bot]"
