@@ -17,7 +17,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        token: ${{ secrets.GH_ACCESS }}
         fetch-depth: 0
 
     - uses: actions/checkout@v3
@@ -60,7 +59,7 @@ jobs:
     - name: Bump version (main PR)
       if: github.event_name == 'pull_request'
       env:
-        GH_TOKEN: ${{ secrets.GH_ACCESS }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"

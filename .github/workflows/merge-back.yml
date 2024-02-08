@@ -16,8 +16,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GH_ACCESS }}
 
     - uses: actions/checkout@v3
       with:
