@@ -14,7 +14,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GH_ACCESS }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v3
 
@@ -27,3 +27,6 @@ jobs:
           git checkout -b staging
           git push -u origin staging --force
           gh pr create -B main -t "release " -b ""
+          export GH_TOKEN=${{ secrets.GH_ACCESS }}
+          git commit -m "trigger workflows" --allow-empty
+          git push
