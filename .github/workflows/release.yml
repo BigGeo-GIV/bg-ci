@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  workflow_call:
+    inputs:
+      commitSHA:
+        required: true
+        type: string
+    secrets:
+      GH_ACCESS:
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GH_ACCESS }}
+    steps:
+      - shell: bash
+        run: |
+          git config --local user.name "github-actions[bot]"
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
+          git checkout ${{ inputs.commitSHA }}
+          git checkout -b staging
+          git push -u origin staging --force
+          gh pr create  -t "release " -b ""
