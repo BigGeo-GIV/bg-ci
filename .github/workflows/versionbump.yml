@@ -70,9 +70,10 @@ jobs:
         git checkout ${{ github.head_ref }}
         echo 4
         gh pr view --json commits > prevMsgs.json
+        echo 5
 
         if python3 bg-ci/BumpVersion.py version.json prevMsgs.json ${{ inputs.name }} false; then
-          echo 5
+          echo 6
           git add version.json
           newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} false)
           newMsg="v""${newVer}""
