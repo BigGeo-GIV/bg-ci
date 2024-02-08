@@ -54,6 +54,7 @@ jobs:
           newMsg="dev""${newVer}"" - ""${prevMsg}"
           git commit -m "${newMsg}"
           git pull
+          git push
         fi
 
     - name: Bump version (main PR)
@@ -69,10 +70,6 @@ jobs:
           newMsg="v""${newVer}""
           git commit -m "${newMsg}"
           git pull
+          git checkout -b local
+          git push origin local:${{ github.head_ref }}
         fi
-
-    - name: Push changes
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GH_ACCESS }}
-        branch: ${{ github.ref }}
