@@ -64,6 +64,7 @@ jobs:
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git checkout ${{ github.head_ref }}
         gh pr view --json commits > prevMsgs.json
 
         if python3 bg-ci/BumpVersion.py version.json prevMsgs.json ${{ inputs.name }} false; then
@@ -72,6 +73,5 @@ jobs:
           newMsg="v""${newVer}""
           git commit -m "${newMsg}"
           git pull
-          git checkout -b local
-          git push origin local:${{ github.head_ref }}
+          git push
         fi
