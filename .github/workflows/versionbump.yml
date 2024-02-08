@@ -76,7 +76,7 @@ jobs:
           echo 6
           git add version.json
           newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} false)
-          newMsg="v""${newVer}""
+          newMsg="v""${newVer}"
           git commit -m "${newMsg}"
           git pull
           git push
