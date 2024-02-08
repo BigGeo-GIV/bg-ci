@@ -1,0 +1,38 @@
+name: Version Bump
+
+on:
+  workflow_call:
+    inputs:
+      name:
+        required: true
+        type: string
+    secrets:
+      GH_ACCESS:
+        required: true
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.GH_ACCESS }}
+
+    - uses: actions/checkout@v3
+      with:
+        repository: BigGeo-GIV/bg-ci
+        ref: main
+        path: bg-ci
+        token: ${{ secrets.GH_ACCESS }}
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.10" }
+
+    - name: Create merge-back PR
+      id: populate
+      shell: bash
+      run: |
+        newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} false)
+        gh pr create  -t "v${newVer} merge back to develop" -b ""
