@@ -34,4 +34,6 @@ jobs:
       shell: bash
       run: |
         newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} false)
+        git checkout -b merge-back
+        git push -u origin merge-back --force
         gh pr create  -t "v${newVer} merge back to develop" -b ""
