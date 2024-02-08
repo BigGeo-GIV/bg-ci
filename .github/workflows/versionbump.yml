@@ -58,7 +58,7 @@ jobs:
         fi
 
     - name: Bump version (main PR)
-      if: github.ref == 'refs/heads/main' && github.event_name == 'pull_request'
+      if: github.event_name == 'pull_request'
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
