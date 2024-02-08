@@ -26,4 +26,4 @@ jobs:
           git checkout ${{ inputs.commitSHA }}
           git checkout -b staging
           git push -u origin staging --force
-          gh pr create  -t "release " -b ""
+          gh pr create -B main -t "release " -b ""
