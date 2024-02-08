@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         token: ${{ secrets.GH_ACCESS }}
-        fetch-depth: 2
+        fetch-depth: 0
 
     - uses: actions/checkout@v3
       with:
