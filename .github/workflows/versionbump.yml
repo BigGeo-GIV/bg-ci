@@ -50,7 +50,7 @@ jobs:
         if python3 bg-ci/BumpVersion.py version.json prevMsg.txt ${{ inputs.name }} true; then
           git add version.json
           newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} true)
-          newMsg="dev""${newVer}"" - ""${prevMsg}"
+          newMsg="dev""${newVer}"" - ""$(cat prevMsg.txt)"
           git commit -m "${newMsg}"
           git pull
           git push
