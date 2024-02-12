@@ -45,10 +45,9 @@ jobs:
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        prevMsg=$(git log -1 --pretty=%B)
-        echo {\"commits\":[{\"messageHeadline\":\"${prevMsg}\"}]} > prevMsgs.json
+        git log -1 --pretty=%B > prevMsg.txt
 
-        if python3 bg-ci/BumpVersion.py version.json prevMsgs.json ${{ inputs.name }} true; then
+        if python3 bg-ci/BumpVersion.py version.json prevMsg.txt ${{ inputs.name }} true; then
           git add version.json
           newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} true)
           newMsg="dev""${newVer}"" - ""${prevMsg}"

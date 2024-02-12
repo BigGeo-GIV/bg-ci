@@ -5,23 +5,26 @@ import json
 def commitJsonToIdx(commitJson, allowMajor):
     minFound = 10
     for commit in commitJson["commits"]:
-        msg = commit["messageHeadline"]
-
-        cType = msg.split(":")[0].lower()
-        if cType[-1] == "!": # not really working right now: or "BREAKING CHANGE" in msg:
-            if allowMajor:
-                found = 0
-            found = 1
-        elif "feat" in cType:
-            found = 1
-        elif "fix" in cType:
-            found = 2
-        elif "infra" in cType or "deps" in cType:
-            found = 10
-        else:
-            found = 1 # bump minor if commit didn't match a pattern just to be safe
+        found = commitTxtToIdx(commit["messageHeadline"])
         minFound = min(minFound, found)
     return minFound
+
+def commitTxtToIdx(commitText, allowMajor):
+    msg = commitText
+
+    cType = msg.split(":")[0].lower()
+    if cType[-1] == "!": # not really working right now: or "BREAKING CHANGE" in msg:
+        if allowMajor:
+            return  0
+        return 1
+    elif "feat" in cType:
+        return 1
+    elif "fix" in cType:
+        return 2
+    elif "infra" in cType or "deps" in cType:
+        return 10
+    else:
+        return 1 # bump minor if commit didn't match a pattern just to be safe
 
 def bumpSemVerList(semVer, idx):
     semVer[idx] += 1
@@ -37,13 +40,23 @@ def bumpSemVerStr(semVerStr, idx):
 
 if __name__ == "__main__":
     path = sys.argv[1]
-    commitJsonPath = sys.argv[2]
+    commitFilePath = sys.argv[2]
     baseName = sys.argv[3]
     dev = distutils.util.strtobool(sys.argv[4])
-    idx = commitJsonToIdx(json.load(open(commitJsonPath)), not dev)
+
+    ext = commitFilePath.split(".")[1].strip()
+
+    if ext == "json":
+        idx = commitJsonToIdx(json.load(open(commitFilePath)), not dev)
+    elif ext == "txt":
+        idx = commitTxtToIdx(''.join(open(commitFilePath).readlines()), not dev)
+    else:
+        print("unrecognized commit file extension")
+        exit(1)
+
     if idx == 10:
         print("no need to bump version")
-        exit(-1)
+        exit(2)
 
     if dev:
         name = baseName + "-dev"
