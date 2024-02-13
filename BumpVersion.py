@@ -5,7 +5,7 @@ import json
 def commitJsonToIdx(commitJson, allowMajor):
     minFound = 10
     for commit in commitJson["commits"]:
-        found = commitTxtToIdx(commit["messageHeadline"])
+        found = commitTxtToIdx(commit["messageHeadline"], allowMajor)
         minFound = min(minFound, found)
     return minFound
 
