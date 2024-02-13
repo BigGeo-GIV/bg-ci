@@ -57,7 +57,7 @@ jobs:
         fi
 
     - name: Bump version (main PR)
-      if: github.event_name == 'pull_request'
+      if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/staging'
       env:
         GH_TOKEN: ${{ github.token }}
       run: |

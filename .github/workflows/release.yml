@@ -27,5 +27,4 @@ jobs:
           git checkout -b staging
           git push -u origin staging --force
           gh pr create -B main -t "release " -b ""
-          export GH_TOKEN=${{ secrets.GH_ACCESS }}
-          gh pr edit --add-label release
+          gh workflow run version-bump.yml --ref staging
