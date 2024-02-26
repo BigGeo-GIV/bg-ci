@@ -176,6 +176,7 @@ jobs:
         /usr/local/opt/llvm@16/bin/clang++ --version
 
     - name: Install gcc-12
+      if: matrix.os == 'ubuntu-22.04'
       run: |
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
