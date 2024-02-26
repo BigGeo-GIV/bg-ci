@@ -195,6 +195,10 @@ jobs:
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
+        if [ ${{ matrix.os }} = windows-2022 ]; then
+          export CC=clang
+          export CXX=clang++
+        fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         cmake "--preset=ci-${os}"
 
