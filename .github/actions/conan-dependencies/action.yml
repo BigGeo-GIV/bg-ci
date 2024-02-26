@@ -23,6 +23,13 @@ runs:
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
+        if [ ${{ runner.os }} = Windows ]; then
+          export CC=clang
+          export CXX=clang++
+
+          clang --version
+          clang++ --version
+        fi
         conan profile new default --detect
         if [ ${{ runner.os }} = Linux ]; then
           conan profile update settings.compiler.libcxx=libstdc++11 default
