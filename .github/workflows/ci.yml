@@ -44,7 +44,7 @@ jobs:
       with: { python-version: "3.10" }
 
     - name: Install clang-format
-      run: pip3 install clang-format>=15.0.6
+      run: pip3 install clang-format=17.0.2
 
     - name: clang-format
       run: cmake -D FORMAT_COMMAND=clang-format -P cmake/lint.cmake
