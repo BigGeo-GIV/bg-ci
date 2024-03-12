@@ -7,9 +7,9 @@ on:
         required: false
         default: false
         type: boolean
-      docker_deploy:
-        required: false
-        default: false
+      dev_version_deploy:
+        description: 'Deploy as dev version?'
+        required: true
         type: boolean
     secrets:
       GH_ACCESS:
@@ -77,12 +77,19 @@ jobs:
         name: ubuntu-22.04-executable
         path: build/
 
-    - name: Move build artifacts
+    - name: Development version
+      id: dev_version
+      if: inputs.dev_version_deploy
+      run: |
+        echo DEV_PREFIX=dev- >> $GITHUB_OUTPUT
+
+    - name: Set version
       id: version
       run: |
         mkdir -p Docker
         cp -r build/* Docker
-        echo VERSION=dev-0.4.0 >> $GITHUB_OUTPUT
+        ver=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} true)
+        echo VERSION=${{steps.dev_version.outputs.DEV_PREFIX}}"${ver}" >> $GITHUB_OUTPUT
 
     - name: Set up Docker Build
       uses: docker/setup-buildx-action@v2
