@@ -17,7 +17,6 @@ on:
 jobs:
   deploy:
     env:
-      CONAN_REVISIONS_ENABLED: 1
       service_name: "'Bg_auto'"
       compute_pool: "'LAND_NA_LEASE'"
       db_name: 'SPDEMO'

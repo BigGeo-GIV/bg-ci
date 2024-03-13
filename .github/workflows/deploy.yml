@@ -26,6 +26,9 @@ on:
 
 jobs:
   build-and-test:
+    env:
+      CONAN_REVISIONS_ENABLED: 1
+
     runs-on: ubuntu-22.04
 
     outputs:
