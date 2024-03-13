@@ -63,7 +63,33 @@ jobs:
           push: true
           context: ./Docker/
           tags: |
-            crbgsearchdevwestus001.azurecr.io/bg-search-test:${{steps.version.outputs.VERSION}}
-            eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{steps.version.outputs.VERSION}}
-            ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER}}/bg_server:${{steps.version.outputs.VERSION}}
+            crbgsearchdevwestus001.azurecr.io/bg-search-test:${{ inputs.version }}
+            eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ inputs.version }}
+            ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER}}/bg_server:${{ inputs.version }}
           build-args: REACT_APP_ENV=prod
+
+      - name: Deploy bgsearch in Snowflake
+        uses: BigGeo-GIV/snowflake-spcs-config/.github/workflows/SPCS_File_Deploy.yml@main
+        with:
+          version: ${{ inputs.version }}
+
+    # - name: Snowflake Query Action
+    #   id: snowflake
+    #   uses: anecdotes-ai/snowflake-query@v1.2
+    #   env:
+    #     bg_version: '${{steps.version.outputs.VERSION}}'
+    #   with:
+    #     # Username for Snowflake DB
+    #     snowflake_username: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_NAME}}
+    #     # Password for Snowflake DB
+    #     snowflake_password: ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_PSWD}}
+    #     # Account name for Snowflake DB. Your account name is the full/entire string to the left of snowflakecomputing.com.
+    #     snowflake_account: 'kyb07147'
+    #     # Warehouse as context
+    #     snowflake_warehouse: 'BIGGEO'
+    #     # Set user role
+    #     snowflake_role: 'ALCYONE_ROLE'
+    #     # List of SQL queries, seperated by ;
+    #     queries: 'CALL ${{env.db_name}}.${{env.schema_name}}.BigGeoDeployment(service_name=>${{env.service_name}},compute_pool=>${{env.compute_pool}},bg_version=>''${{steps.version.outputs.VERSION}}'',db_name=>''${{env.db_name}}'',schema_name=>''${{env.schema_name}}'', spec_file => ${{env.spec_file}}, table_name=>${{env.table_name}}, geomtype => [${{env.geomtype}}])'
+    #     # Whether to run the queries sync (default is async)
+    #     # sync: # optional
