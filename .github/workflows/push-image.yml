@@ -71,6 +71,7 @@ jobs:
   snowflake:
     needs: deploy
     name: Snowflake Bg-search deployment
+    secrets: inherit
     uses: BigGeo-GIV/snowflake-spcs-config/.github/workflows/SPCS_File_Deploy.yml@main
     with:
       version: ${{ inputs.version }}
