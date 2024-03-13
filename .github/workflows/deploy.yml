@@ -106,6 +106,7 @@ jobs:
         path: Docker
 
   deploy:
+    needs: build-and-test
     name: Trigger push-image workflow
     uses: BigGeo-GIV/bg-ci/.github/workflows/push-image.yml@main
     secrets: inherit

@@ -68,10 +68,12 @@ jobs:
             ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER}}/bg_server:${{ inputs.version }}
           build-args: REACT_APP_ENV=prod
 
-      - name: Deploy bgsearch in Snowflake
-        uses: BigGeo-GIV/snowflake-spcs-config/.github/workflows/SPCS_File_Deploy.yml@main
-        with:
-          version: ${{ inputs.version }}
+  snowflake:
+    needs: deploy
+    name: Snowflake Bg-search deployment
+    uses: BigGeo-GIV/snowflake-spcs-config/.github/workflows/SPCS_File_Deploy.yml@main
+    with:
+      version: ${{ inputs.version }}
 
     # - name: Snowflake Query Action
     #   id: snowflake
