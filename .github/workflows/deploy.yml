@@ -102,10 +102,13 @@ jobs:
         cp -r build/* Docker
         ver=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} ${{ inputs.dev_version_deploy }})
         echo "VERSION=${{steps.dev_version.outputs.DEV_PREFIX}}${ver}" >> "$GITHUB_OUTPUT"
-        echo "${GITHUB_OUTPUT}"
-        echo $GIT_OUTPUT
-        echo "foo"
-        echo bar
+
+    - name: Test the set version
+      run: |
+        echo "VERSION=${{steps.version.outputs.VERSION}}"
+        echo "DEV_PREFIX=${{steps.dev_version.outputs.DEV_PREFIX}}"
+        echo foo
+        echo "bar"
 
     - name: Set up Docker Build
       uses: docker/setup-buildx-action@v2
