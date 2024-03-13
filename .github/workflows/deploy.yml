@@ -11,6 +11,11 @@ on:
         description: 'Deploy as dev version?'
         required: true
         type: boolean
+      name:
+        description: 'The name used as a key to get the version from the version.json file. Usually the name of the repo.'
+        required: true
+        type: string
+
     secrets:
       GH_ACCESS:
         required: true
@@ -95,7 +100,7 @@ jobs:
       run: |
         mkdir -p Docker
         cp -r build/* Docker
-        ver=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} true)
+        ver=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} ${{ inputs.dev_version_deploy }})
         echo VERSION=${{steps.dev_version.outputs.DEV_PREFIX}}"${ver}" >> $GITHUB_OUTPUT
         echo ${{steps.version.outputs.VERSION}}
 
