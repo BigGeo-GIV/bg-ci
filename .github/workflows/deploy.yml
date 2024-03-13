@@ -28,6 +28,10 @@ jobs:
   build-and-test:
     runs-on: ubuntu-22.04
 
+    outputs:
+      docker_name: ${{ steps.docker_name.outputs.NAME }}
+      bg_search_version: ${{ steps.version.outputs.VERSION }}
+
     steps:
     - uses: actions/checkout@v3
       with: { submodules: recursive }
@@ -111,5 +115,5 @@ jobs:
     uses: BigGeo-GIV/bg-ci/.github/workflows/push-image.yml@main
     secrets: inherit
     with:
-      docker_name: ${{steps.docker_name.outputs.NAME}}
-      version: ${{steps.version.outputs.VERSION}}
+      docker_name: ${{needs.build-and-test.outputs.docker_name}}
+      version: ${{needs.build-and-test.outputs.bg_search_version}}
