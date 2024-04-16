@@ -176,6 +176,7 @@ jobs:
         /usr/local/opt/llvm@16/bin/clang++ --version
 
     - name: Dependencies
+      env: { CC: clang-16, CXX: clang++-16 }
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
