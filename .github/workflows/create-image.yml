@@ -76,7 +76,7 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        context: ./Docker/
+        context: ./
         tags: |
           crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.VERSION }}
           eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.VERSION }}
