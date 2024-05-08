@@ -1,8 +1,10 @@
-import distutils
 import json
 import sys
 
-dev = distutils.util.strtobool(sys.argv[3])
+def strtobool(value: str) -> bool:
+    return value.lower() in ("y", "yes", "on", "1", "true", "t")
+
+dev = strtobool(sys.argv[3])
 if dev:
     name = sys.argv[2] + "-dev"
 else:
