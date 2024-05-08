@@ -1,0 +1,48 @@
+name: "Docker login"
+description: "Authenticate with docker regeistries"
+inputs:
+  DOCKER_USER:
+    description: Docker username
+    required: true
+  DOCKER_PASS:
+    description: Docker password
+    required: true
+  DOCKER_USER_OREGON:
+    description: Docker username
+    required: true
+  DOCKER_PASS_OREGON:
+    description: Docker password
+    required: true
+  BG_SEARCH_DOCKER_REGISTRY_AZ_SERVER:
+    description: Docker registry
+    required: true
+  BG_SEARCH_DOCKER_REGISTRY_AZ_NAME:
+    description: Docker username
+    required: true
+  BG_SEARCH_DOCKER_REGISTRY_AZ_PSWD:
+    description: Docker password
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Log in to registry
+      uses: docker/login-action@v3
+      with:
+        registry: https://eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/
+        username: ${{ inputs.DOCKER_USER}}
+        password: ${{ inputs.DOCKER_PASS}}
+
+    - name: Log in to registry
+      uses: docker/login-action@v3
+      with:
+        registry: https://eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/
+        username: ${{ inputs.DOCKER_USER_OREGON}}
+        password: ${{ inputs.DOCKER_PASS_OREGON}}
+
+    - name: Log in to Azure registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.BG_SEARCH_DOCKER_REGISTRY_AZ_SERVER }}
+        username: ${{ inputs.BG_SEARCH_DOCKER_REGISTRY_AZ_NAME}}
+        password: ${{ inputs.BG_SEARCH_DOCKER_REGISTRY_AZ_PSWD}}
