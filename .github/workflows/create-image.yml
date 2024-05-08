@@ -1,0 +1,90 @@
+name: Create Image
+
+on:
+  workflow_call:
+    inputs:
+      dev_version:
+        description: 'Deploy as dev version?'
+        required: true
+        type: boolean
+      name:
+        description: 'The name used as a key to get the version from the version.json file. Usually the name of the repo.'
+        required: true
+        type: string
+
+    secrets:
+      GH_ACCESS:
+        required: true
+      JF_ACCESS_TOKEN:
+        required: true
+      JF_CONAN_URL:
+        required: true
+
+jobs:
+  build-image:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v3
+      with: { submodules: recursive }
+
+    - uses: actions/checkout@v3
+      with:
+        repository: BigGeo-GIV/bg-ci
+        ref: main
+        path: bg-ci
+        token: ${{ secrets.GH_ACCESS }}
+
+    - name: Get version
+      id: version
+      run: |
+        if [ ${{ inputs.dev_version }} = true ]; then
+          prefix=dev-
+          stageOrLatest=stage
+        else
+          stageOrLatest=latest
+        fi
+        ver=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} ${{ inputs.dev_version }})
+        echo "VERSION=${prefix}${ver}" >> "$GITHUB_OUTPUT"
+        echo "STAGE_OR_LATEST=${stageOrLatest}" >> "$GITHUB_OUTPUT"
+
+    - name: Set up Docker Build
+      uses: docker/setup-buildx-action@v2
+
+    - name: Docker login to Azure Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_SERVER }}
+        username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_NAME }}
+        password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_PSWD }}
+
+    - name: Docker login to Snowflake Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SERVER }}
+        username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_NAME }}
+        password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_PSWD }}
+
+    - name: Docker login to S&P Snowflake Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}
+        username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_NAME }}
+        password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_PSWD }}
+
+    - name: Build and push bg-search docker image
+      uses: docker/build-push-action@v3
+      with:
+        push: true
+        context: ./Docker/
+        tags: |
+          crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.VERSION }}
+          eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.VERSION }}
+          ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}/bg_server:${{ steps.version.outputs.VERSION }}
+          crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.STAGE_OR_LATEST }}
+          eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
+          ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
+        build-args: |
+          CONAN_URL=${{ secrets.JF_CONAN_URL }}
+          CONAN_USER=github_workflow
+          CONAN_PSWD=${{ secrets.JF_ACCESS_TOKEN }}
