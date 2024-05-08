@@ -62,9 +62,12 @@ jobs:
           push: true
           context: ./Docker/
           tags: |
-            crbgsearchdevwestus001.azurecr.io/bg-search-test:${{ inputs.version }}
+            crbgsearchdevwestus001.azurecr.io/bg-search:${{ inputs.version }}
+            crbgsearchdevwestus001.azurecr.io/bg-search:latest
             eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ inputs.version }}
+            eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:latest
             ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER}}/bg_server:${{ inputs.version }}
+            ${{secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER}}/bg_server:latest
           build-args: REACT_APP_ENV=prod
 
   snowflake:
