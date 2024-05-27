@@ -58,19 +58,19 @@ jobs:
         username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_NAME }}
         password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_AZ_PSWD }}
 
-    - name: Docker login to Snowflake Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SERVER }}
-        username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_NAME }}
-        password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_PSWD }}
+    # - name: Docker login to Snowflake Registry
+    #   uses: docker/login-action@v2
+    #   with:
+    #     registry: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SERVER }}
+    #     username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_NAME }}
+    #     password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_PSWD }}
 
-    - name: Docker login to S&P Snowflake Registry
-      uses: docker/login-action@v2
-      with:
-        registry: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}
-        username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_NAME }}
-        password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_PSWD }}
+    # - name: Docker login to S&P Snowflake Registry
+    #   uses: docker/login-action@v2
+    #   with:
+    #     registry: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}
+    #     username: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_NAME }}
+    #     password: ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_PSWD }}
 
     - name: Build and push bg-search docker image
       uses: docker/build-push-action@v3
@@ -79,11 +79,13 @@ jobs:
         context: ./
         tags: |
           crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.VERSION }}
-          eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.VERSION }}
-          ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}/bg_server:${{ steps.version.outputs.VERSION }}
           crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.STAGE_OR_LATEST }}
-          eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
-          ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
+
+# eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
+# ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
+# eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.VERSION }}
+# ${{ secrets.BG_SEARCH_DOCKER_REGISTRY_SF_SP_SERVER }}/bg_server:${{ steps.version.outputs.VERSION }}
+
         build-args: |
           CONAN_URL=${{ secrets.JF_CONAN_URL }}
           CONAN_USER=github_workflow
