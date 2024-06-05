@@ -1,15 +1,16 @@
 import distutils
 import sys
 import json
+import os
 
 def commitJsonToIdx(commitJson, allowMajor):
     minFound = 10
     for commit in commitJson["commits"]:
-        found = commitTxtToIdx(commit["messageHeadline"], allowMajor)
+        found = commitTxtToIdx(commit["messageHeadline"], allowMajor, False)
         minFound = min(minFound, found)
     return minFound
 
-def commitTxtToIdx(commitText, allowMajor):
+def commitTxtToIdx(commitText, allowMajor, alwaysBump):
     msg = commitText
 
     cType = msg.split(":")[0].lower()
@@ -24,7 +25,7 @@ def commitTxtToIdx(commitText, allowMajor):
     elif "infra" in cType or "deps" in cType:
         return 10
     else:
-        return 1 # bump minor if commit didn't match a pattern just to be safe
+        return 1 if alwaysBump else 10 # bump minor if commit didn't match a pattern just to be safe
 
 def bumpSemVerList(semVer, idx):
     semVer[idx] += 1
@@ -44,12 +45,12 @@ if __name__ == "__main__":
     baseName = sys.argv[3]
     dev = distutils.util.strtobool(sys.argv[4])
 
-    ext = commitFilePath.split(".")[1].strip()
+    ext = os.path.splitext(commitFilePath)[1]
 
-    if ext == "json":
+    if ext == ".json":
         idx = commitJsonToIdx(json.load(open(commitFilePath)), not dev)
-    elif ext == "txt":
-        idx = commitTxtToIdx(''.join(open(commitFilePath).readlines()), not dev)
+    elif ext == ".txt":
+        idx = commitTxtToIdx(''.join(open(commitFilePath).readlines()), not dev, True)
     else:
         print("unrecognized commit file extension")
         exit(1)
