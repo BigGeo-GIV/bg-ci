@@ -47,7 +47,16 @@ jobs:
       run: pip3 install clang-format==17.0.2
 
     - name: clang-format
-      run: cmake -D FORMAT_COMMAND=clang-format -P cmake/lint.cmake
+      run: cmake -D FORMAT_COMMAND=clang-format -D FIX=YES -P cmake/lint.cmake
+
+    - name: Commit and push format
+      env:
+        GH_TOKEN: ${{ secrets.GH_ACCESS }}
+      run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git commit -am "fixing format"
+        git push
 
   coverage:
     runs-on: ubuntu-22.04
