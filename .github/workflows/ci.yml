@@ -40,7 +40,7 @@ jobs:
       with:
         token: ${{ secrets.GH_ACCESS }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}
-        ref: ${{ github..head_ref }}
+        ref: ${{ github.head_ref }}
         submodules: recursive
 
     - uses: actions/setup-python@v4
