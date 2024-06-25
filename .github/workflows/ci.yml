@@ -38,6 +38,9 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
+        token: ${{ secrets.GH_ACCESS }}
+        repository: ${{ github.event.pull_request.base.repo.full_name }}
+        ref: ${{ github.base_ref }}
         submodules: recursive
 
     - uses: actions/setup-python@v4
@@ -52,6 +55,7 @@ jobs:
     - name: Commit and push format
       env:
         GH_TOKEN: ${{ secrets.GH_ACCESS }}
+      if: github.event_name == 'pull_request'
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
