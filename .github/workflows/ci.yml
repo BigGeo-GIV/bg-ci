@@ -207,6 +207,26 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
         JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
 
+    - name: Upload to conan
+      shell: bash
+      if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        && github.event_name == 'push'
+        && inputs.conan_create
+      run: |
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm@16/bin/clang
+          export CXX=/usr/local/opt/llvm@16/bin/clang++
+        fi
+        export CONAN_DEV_PACKAGE=1
+        if [ ${{ github.ref }} = refs/heads/main ]; then
+          export CONAN_DEV_PACKAGE=0
+        fi
+        conan create . -b missing -pr:a ${{ runner.os }}
+        nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
+        verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
+        nameVer=$(echo ${name}/${ver})
+        conan upload ${nameVer} -r bg-conan -c
+
     - name: Configure
       shell: bash
       env: { CC: clang-16, CXX: clang++-16 }
@@ -227,26 +247,6 @@ jobs:
     - name: Test
       working-directory: build
       run: ctest --timeout 3600 --output-on-failure -C Release -j 2
-
-    - name: Upload to conan
-      shell: bash
-      if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-        && github.event_name == 'push'
-        && inputs.conan_create
-      run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
-        export CONAN_DEV_PACKAGE=1
-        if [ ${{ github.ref }} = refs/heads/main ]; then
-          export CONAN_DEV_PACKAGE=0
-        fi
-        conan create . -b missing -pr:a ${{ runner.os }}
-        nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
-        verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
-        nameVer=$(echo ${name}/${ver})
-        conan upload ${nameVer} -r bg-conan -c
 
     - name: Upload artifacts
       if: inputs.store_artifacts
