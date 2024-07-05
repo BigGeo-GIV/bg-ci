@@ -23,6 +23,6 @@ runs:
         conan config install https://github.com/BigGeo-GIV/bg-conan.git -t git
 
         conan remote add bg-conan ${{ inputs.JF_CONAN_URL }}
-        conan user -p ${{ inputs.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
+        conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
         conan install . -s build_type=${{ inputs.BUILD_TYPE }} -b missing -pr  ${{ runner.os }}
         conan upload "*" --all -r bg-conan -c
