@@ -18,7 +18,7 @@ runs:
     - name: Install Conan dependencies
       shell: bash
       run: |
-        pip3 install "conan<2"
+        pip3 install "conan"
         if [ ${{ runner.os }} = macOS ]; then
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++

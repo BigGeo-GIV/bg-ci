@@ -35,7 +35,7 @@ jobs:
     - name: Update dependencies script
       id: bump
       run: |
-        pip3 install "conan<2"
+        pip3 install "conan"
         pip3 install semantic_version
 
         conan remote add bg-conan ${{ secrets.JF_CONAN_URL }}
