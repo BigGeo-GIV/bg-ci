@@ -66,7 +66,7 @@ jobs:
         else
           echo "No changes were detected."
         fi
-        
+
 
   coverage:
     # Run coverage only when lint succeed
@@ -242,7 +242,7 @@ jobs:
         if [ ${{ github.ref }} = refs/heads/main ]; then
           export CONAN_DEV_PACKAGE=0
         fi
-        conan create . -b missing
+        conan create . -b missing -pr:a ${{ runner.os }}
         nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
         verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
         nameVer=$(echo ${name}/${ver})
