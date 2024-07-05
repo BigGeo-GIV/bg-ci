@@ -19,21 +19,10 @@ runs:
       shell: bash
       run: |
         pip3 install "conan"
-        if [ ${{ runner.os }} = macOS ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
-        conan profile new default --detect
-        if [ ${{ runner.os }} = Linux ]; then
-          conan profile update settings.compiler.libcxx=libstdc++11 default
-        fi
-        if [ ${{ runner.os }} = macOS ]; then
-          conan profile update settings.compiler.libcxx=libc++ default
-        fi
-        conan profile update settings.compiler.cppstd=20 default
-        conan profile update conf.tools.system.package_manager:mode=install default
-        conan profile update conf.tools.system.package_manager:sudo=True default
+
+        conan config install git@github.com:BigGeo-GIV/bg-ci.git -a "-b conan-profiles --single-branch"
+
         conan remote add bg-conan ${{ inputs.JF_CONAN_URL }}
         conan user -p ${{ inputs.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
-        conan install . -s build_type=${{ inputs.BUILD_TYPE }} -b missing -pr:b=default -pr:h=default
+        conan install . -s build_type=${{ inputs.BUILD_TYPE }} -b missing -pr  ${{ runner.os }}
         conan upload "*" --all -r bg-conan -c
