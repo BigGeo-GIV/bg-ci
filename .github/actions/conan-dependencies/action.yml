@@ -25,4 +25,4 @@ runs:
         conan remote add bg-conan ${{ inputs.JF_CONAN_URL }}
         conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
         conan install . -s build_type=${{ inputs.BUILD_TYPE }} -b=missing -pr:b=${{ runner.os }} -pr:h=${{ runner.os }}
-        conan upload "*" --all -r bg-conan -c
+        conan upload "*" -r bg-conan -c
