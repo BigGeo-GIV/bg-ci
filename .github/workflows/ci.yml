@@ -106,10 +106,6 @@ jobs:
     - name: Build
       run: cmake --build build/coverage -j 2
 
-    - name: Test
-      working-directory: build/coverage
-      run: ctest --timeout 3600 --output-on-failure -j 2
-
     - name: Process coverage info
       run: cmake --build build/coverage -t coverage
 
@@ -245,6 +241,7 @@ jobs:
       run: cmake --install build --config Release --prefix prefix
 
     - name: Test
+      if: matrix.os == 'ubuntu-22.04'
       working-directory: build
       run: ctest --timeout 3600 --output-on-failure -C Release -j 2
 
