@@ -20,7 +20,7 @@ runs:
       run: |
         pip3 install "conan"
 
-        conan config install git@github.com:BigGeo-GIV/bg-conan.git
+        conan config install https://github.com/BigGeo-GIV/bg-conan.git -t git
 
         conan remote add bg-conan ${{ inputs.JF_CONAN_URL }}
         conan user -p ${{ inputs.JF_ACCESS_TOKEN }} -r bg-conan github_workflow
