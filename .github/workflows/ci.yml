@@ -205,7 +205,8 @@ jobs:
 
     - name: Upload to conan
       shell: bash
-      if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+      if: matrix.os == 'ubuntu-22.04'
+        && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
         && github.event_name == 'push'
         && inputs.conan_create
       run: |
