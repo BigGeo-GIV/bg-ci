@@ -150,16 +150,13 @@ jobs:
       if: matrix.os == 'macos-latest'
       run: |
         brew install llvm
-        echo '' >> /Users/runner/.bash_profile
-        echo 'export PATH="/opt/homebrew/opt/llvm/bin:$PATH"' >> /Users/runner/.bash_profile
-        cat /Users/runner/.bash_profile
+        ln -s /opt/homebrew/opt/llvm/bin/clang /usr/local/bin/clang
+        ln -s /opt/homebrew/opt/llvm/bin/clang++ /usr/local/bin/clang++
 
     - name: Install llvm clang
       if: matrix.os == 'macos-latest'
       run: |
-        echo $PATH
-        echo $CXX
-        cat /Users/runner/.bash_profile
+        clang --version
         clang++ --version
 
     - name: Dependencies
