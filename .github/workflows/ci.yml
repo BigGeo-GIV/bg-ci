@@ -178,6 +178,7 @@ jobs:
         conan upload ${nameVer} -r bg-conan -c
 
     - name: Configure
+      shell: bash
       run: |
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         cmake "--preset=ci-${os}"
