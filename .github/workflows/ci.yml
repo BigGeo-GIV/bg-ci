@@ -9,7 +9,7 @@ on:
         type: boolean
       test_os_matrix:
         required: false
-        default: "['ubuntu-22.04', 'windows-2022', 'macos-12']"
+        default: "['ubuntu-latest', 'windows-latest', 'macos-latest']"
         type: string
       build_docs:
         required: false
@@ -33,7 +33,7 @@ on:
 
 jobs:
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -71,7 +71,7 @@ jobs:
   coverage:
     # Run coverage only when lint succeed
     needs: [lint]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     env: {CONAN_REVISIONS_ENABLED: 1}
 
@@ -88,7 +88,7 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
 
-    - name: Install gcc-12
+    - name: Use gcc-12
       run: |
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
         sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
@@ -117,50 +117,6 @@ jobs:
         fail_ci_if_error: false
         verbose: true # optional (default = false)
 
-  # sanitize:
-  #   needs: [lint]
-  #   runs-on: ubuntu-22.04
-
-  #   env: {CONAN_REVISIONS_ENABLED: 1}
-
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #     with: { submodules: recursive }
-
-  #   - name: Install Python
-  #     uses: actions/setup-python@v4
-  #     with: { python-version: "3.8" }
-
-  #   - name: Dependencies
-  #     uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
-  #     with:
-  #       JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-  #       JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
-
-  #   - name: Install clang 15
-  #     run: |
-  #       curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
-  #       chmod +x /opt/llvm.sh
-  #       sudo /opt/llvm.sh 15
-
-  #   - name: Configure
-  #     env: { CC: clang, CXX: clang++-15 }
-  #     run: cmake --preset=ci-sanitize
-
-  #   - name: Build
-  #     run: cmake --build build/sanitize -j 2
-
-  #   - name: Test
-  #     working-directory: build/sanitize
-  #     env:
-  #       ASAN_OPTIONS: "strict_string_checks=1:\
-  #         detect_stack_use_after_return=1:\
-  #         check_initialization_order=1:\
-  #         strict_init_order=1:\
-  #         detect_leaks=1"
-  #       UBSAN_OPTIONS: print_stacktrace=1
-  #     run: ctest --output-on-failure -j 2
-
   build-and-test:
     # Run build-and-test only when lint succeed
     needs: [lint]
@@ -181,21 +137,20 @@ jobs:
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
 
-    - name: Install clang and gcc
-      if: matrix.os == 'ubuntu-22.04'
+    - name: Install clang
+      if: matrix.os == 'ubuntu-latest'
       run: |
         curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
         chmod +x /opt/llvm.sh
-        sudo /opt/llvm.sh 16
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
-        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
+        sudo /opt/llvm.sh 18
+        sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-18 50
+        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-18 50
 
     - name: Install llvm clang
-      if: matrix.os == 'macos-12'
+      if: matrix.os == 'macos-latest'
       run: |
-        brew install llvm@16
-        /usr/local/opt/llvm@16/bin/clang++ --version
+        brew install llvm@18
+        echo 'export PATH="/opt/homebrew/opt/llvm@16/bin:$PATH"' >> /Users/runner/.bash_profile
 
     - name: Dependencies
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
@@ -210,10 +165,6 @@ jobs:
         && github.event_name == 'push'
         && inputs.conan_create
       run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
         export CONAN_DEV_PACKAGE=1
         if [ ${{ github.ref }} = refs/heads/main ]; then
           export CONAN_DEV_PACKAGE=0
@@ -226,12 +177,7 @@ jobs:
 
     - name: Configure
       shell: bash
-      env: { CC: clang-16, CXX: clang++-16 }
       run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         cmake "--preset=ci-${os}"
 
