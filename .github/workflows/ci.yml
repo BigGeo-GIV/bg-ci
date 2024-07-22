@@ -194,6 +194,7 @@ jobs:
         cmake "--preset=ci-${os}"
 
     - name: Build
+      shell: bash
       run: |
         if [ ${{ runner.os }} = macOS ]; then
         export PATH=/Users/runner/hostedtoolcache/Python/3.10.11/arm64/bin:/Users/runner/hostedtoolcache/Python/3.10.11/arm64:/Users/runner/hostedtoolcache/cmake/3.27.9/arm64/cmake-3.27.9-macos-universal/CMake.app/Contents/bin:/bin:/Users/runner/.local/bin/Users/runner/.cargo/bin:/usr/local/opt/curl/bin:/usr/local/bin:/usr/local/sbin:/Users/runner/bin:/Users/runner/.yarn/bin:/Users/runner/Library/Android/sdk/tools:/Users/runner/Library/Android/sdk/platform-tools:/Library/Frameworks/Python.framework/Versions/Current/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/usr/bin:/bin:/usr/sbin:/sbin:/Users/runner/.dotnet/tools
