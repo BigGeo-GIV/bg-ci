@@ -205,7 +205,7 @@ jobs:
       run: cmake --install build --config Release --prefix prefix
 
     - name: Test
-      if: matrix.os == 'ubuntu-22.04'
+      if: matrix.os == 'ubuntu-latest'
       working-directory: build
       run: ctest --timeout 3600 --output-on-failure -C Release -j 2
 
@@ -220,7 +220,7 @@ jobs:
     # Deploy docs only when builds succeed
     needs: [build-and-test]
 
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     if: github.ref == 'refs/heads/main'
       && github.event_name == 'push'
