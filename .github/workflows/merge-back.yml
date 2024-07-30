@@ -11,7 +11,7 @@ on:
         required: true
 
 jobs:
-  version-bump:
+  merge-back:
     runs-on: ubuntu-latest
 
     steps:
