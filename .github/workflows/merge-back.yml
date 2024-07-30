@@ -1,4 +1,4 @@
-name: Version Bump
+name: Merge Back
 
 on:
   workflow_call:
@@ -11,7 +11,7 @@ on:
         required: true
 
 jobs:
-  version-bump:
+  merge-back:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,7 +33,12 @@ jobs:
         GH_TOKEN: ${{ github.token }}
       shell: bash
       run: |
+        branchAry=($(echo ${{ github.ref_name }} | tr "-" "\n")) && suffix=${branchAry[1]}
+        if [ -n "${suffix}" ]; then
+          suffix=-${suffix}
+        fi
+
         newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} false)
-        git checkout -b merge-back
-        git push -u origin merge-back --force
-        gh pr create  -t "v${newVer} merge back to develop" -b ""
+        git checkout -b merge-back${suffix}
+        git push -u origin merge-back${suffix} --force
+        gh pr create -B develop${suffix} -t "v${newVer} merge back to develop" -b ""

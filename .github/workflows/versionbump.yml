@@ -27,50 +27,40 @@ jobs:
         path: bg-ci
         token: ${{ secrets.GH_ACCESS }}
 
-    # - name: Check for manual version change
-    #   id: check
-    #   run: |
-    #     if git diff --name-only HEAD^ HEAD | grep version.json; then
-    #       echo version and source changed: no need to bump
-    #     else
-    #       echo "GO=1" >> $GITHUB_OUTPUT
-    #     fi
-
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
 
-    - name: Bump version (dev push)
-      if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-      run: |
-        git config --local user.name "github-actions[bot]"
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git log -1 --pretty=%B > prevMsg.txt
-
-        if python3 bg-ci/BumpVersion.py version.json prevMsg.txt ${{ inputs.name }} true; then
-          git add version.json
-          newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} true)
-          newMsg="dev""${newVer}"" - ""$(cat prevMsg.txt)"
-          git commit -m "${newMsg}"
-          git pull
-          git push
-        fi
-
-    - name: Bump version (main PR)
-      if: github.event_name == 'workflow_dispatch'
+    - name: Bump version
       env:
         GH_TOKEN: ${{ github.token }}
+      # We do different things when bumping version on a PR vs on a branch commit; the workflow_dispatch
+      # conditional is how we detect these situations and behave accordingly
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git checkout ${{ github.head_ref }}
-        gh pr view --json commits > prevMsgs.json
 
-        if python3 bg-ci/BumpVersion.py version.json prevMsgs.json ${{ inputs.name }} false; then
+        if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
+          git checkout ${{ github.head_ref }}
+          gh pr view --json commits > prevMsgs.json
+          file=prevMsgs.json
+          dev=false
+          messagePrefix="v"
+          messageSuffix=""
+        else
+          git log -1 --pretty=%B > prevMsg.txt
+          file=prevMsg.txt
+          dev=true
+          messagePrefix="dev"
+          messageSuffix=" - $(cat prevMsg.txt)"
+        fi
+
+        didBump=$(python3 bg-ci/BumpVersion.py version.json ${file} ${{ inputs.name }} ${dev})
+
+        if [ "${didBump}" = "bump" ]; then
           git add version.json
-          newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} false)
-          newMsg="v""${newVer}"
-          git commit -m "${newMsg}"
+          newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} ${dev})
+          git commit -m "${messagePrefix}${newVer}${messageSuffix}"
           git pull
           git push
         fi

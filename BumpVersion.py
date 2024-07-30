@@ -1,7 +1,9 @@
-import distutils
 import sys
 import json
 import os
+
+def strtobool(value: str) -> bool:
+    return value.lower() in ("y", "yes", "on", "1", "true", "t")
 
 def commitJsonToIdx(commitJson, allowMajor):
     minFound = 10
@@ -22,7 +24,7 @@ def commitTxtToIdx(commitText, allowMajor, alwaysBump):
         return 1
     elif "fix" in cType:
         return 2
-    elif "infra" in cType or "deps" in cType:
+    elif "infra" in cType:
         return 10
     else:
         return 1 if alwaysBump else 10 # bump minor if commit didn't match a pattern just to be safe
@@ -43,7 +45,7 @@ if __name__ == "__main__":
     path = sys.argv[1]
     commitFilePath = sys.argv[2]
     baseName = sys.argv[3]
-    dev = distutils.util.strtobool(sys.argv[4])
+    dev = strtobool(sys.argv[4])
 
     ext = os.path.splitext(commitFilePath)[1]
 
@@ -56,8 +58,8 @@ if __name__ == "__main__":
         exit(1)
 
     if idx == 10:
-        print("no need to bump version")
-        exit(2)
+        print("nobump")
+        exit(0)
 
     if dev:
         name = baseName + "-dev"
@@ -72,3 +74,4 @@ if __name__ == "__main__":
     out = open(path, "w")
     json.dump(verJson, out)
     out.write("\n")
+    print("bump")
