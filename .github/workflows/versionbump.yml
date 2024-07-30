@@ -23,18 +23,9 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: v2
+        ref: main
         path: bg-ci
         token: ${{ secrets.GH_ACCESS }}
-
-    # - name: Check for manual version change
-    #   id: check
-    #   run: |
-    #     if git diff --name-only HEAD^ HEAD | grep version.json; then
-    #       echo version and source changed: no need to bump
-    #     else
-    #       echo "GO=1" >> $GITHUB_OUTPUT
-    #     fi
 
     - name: Install Python
       uses: actions/setup-python@v4
@@ -43,6 +34,8 @@ jobs:
     - name: Bump version
       env:
         GH_TOKEN: ${{ github.token }}
+      # We do different things when bumping version on a PR vs on a branch commit; the workflow_dispatch
+      # conditional is how we detect these situations and behave accordingly
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
