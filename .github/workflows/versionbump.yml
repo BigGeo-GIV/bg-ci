@@ -42,6 +42,9 @@ jobs:
 
     - name: Bump version
       run: |
+        git config --local user.name "github-actions[bot]"
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+
         if [ ${{ github.event_name }} == 'workflow_dispatch' ]; then
           git checkout ${{ github.head_ref }}
           gh pr view --json commits > prevMsgs.json
@@ -49,19 +52,16 @@ jobs:
           dev=false
           messagePrefix="v"
           messageSuffix=""
+          export GH_TOKEN=${{ github.token }}
         else
           git log -1 --pretty=%B > prevMsg.txt
           file=prevMsg.txt
           dev=true
           messagePrefix="dev"
           messageSuffix=" - $(cat prevMsg.txt)"
-
-          echo "else"
         fi
 
         didBump=$(python3 bg-ci/BumpVersion.py version.json ${file} ${{ inputs.name }} ${dev})
-        echo "body"
-        echo ${didBump}
 
         if [ "${didBump}" = "bump" ]; then
           git add version.json
