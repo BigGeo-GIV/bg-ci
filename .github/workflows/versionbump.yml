@@ -41,6 +41,8 @@ jobs:
       with: { python-version: "3.10" }
 
     - name: Bump version
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -52,7 +54,6 @@ jobs:
           dev=false
           messagePrefix="v"
           messageSuffix=""
-          export GH_TOKEN=${{ github.token }}
         else
           git log -1 --pretty=%B > prevMsg.txt
           file=prevMsg.txt
