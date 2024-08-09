@@ -241,8 +241,14 @@ jobs:
     - name: Install
       run: cmake --install build --config Release --prefix prefix
 
-    - name: Test
-      if: matrix.os == 'ubuntu-22.04'
+    - name: Precheckin Test
+      if: github.event_name == 'pull_request'
+      working-directory: build
+      run: ctest --timeout 3600 --output-on-failure -C Release -j 2 -E ".ext."
+
+    - name: Extended Test
+      if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+          && github.event_name == 'push'
       working-directory: build
       run: ctest --timeout 3600 --output-on-failure -C Release -j 2
 
