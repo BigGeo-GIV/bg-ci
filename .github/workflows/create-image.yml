@@ -71,7 +71,6 @@ jobs:
           crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.VERSION }}
           crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.STAGE_OR_LATEST }}
         build-args: |
-          CONAN_URL=${{ secrets.JF_CONAN_URL }}
           CONAN_USER=github_workflow
           CONAN_PSWD=${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -86,6 +85,5 @@ jobs:
           eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.VERSION }}
           eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
         build-args: |
-          CONAN_URL=${{ secrets.JF_CONAN_URL }}
           CONAN_USER=github_workflow
           CONAN_PSWD=${{ secrets.JF_ACCESS_TOKEN }}

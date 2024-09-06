@@ -87,6 +87,12 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+
+    - name: Install python dependencies
+      run: poetry update --no-interaction
 
     - name: Install gcc-12
       run: |
@@ -98,13 +104,12 @@ jobs:
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-        JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
 
     - name: Configure
-      run: cmake --preset=ci-coverage
+      run: poetry run config --preset ci-coverage
 
     - name: Build
-      run: cmake --build build/coverage -j 2
+      run: poetry run build --preset ci-coverage
 
     - name: Process coverage info
       run: cmake --build build/coverage -t coverage
@@ -180,6 +185,12 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+
+    - name: Install python dependencies
+      run: poetry update --no-interaction
 
     - name: Install clang and gcc
       if: matrix.os == 'ubuntu-22.04'
@@ -201,7 +212,6 @@ jobs:
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-        JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
 
     - name: Upload to conan
       shell: bash
@@ -218,7 +228,7 @@ jobs:
         if [ ${{ github.ref }} = refs/heads/main ]; then
           export CONAN_DEV_PACKAGE=0
         fi
-        conan create . -b missing -pr:a ${{ runner.os }}
+        conan create . -b missing -pr:a bg-profile
         nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
         verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
         nameVer=$(echo ${name}/${ver})
@@ -233,10 +243,12 @@ jobs:
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        cmake "--preset=ci-${os}"
+        poetry run invoke config --preset "ci-${os}"
 
     - name: Build
-      run: cmake --build build --config Release -j 2
+      run: |
+        osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
+        poetry run build --preset ci-${os}
 
     - name: Install
       run: cmake --install build --config Release --prefix prefix
@@ -244,13 +256,13 @@ jobs:
     - name: Precheckin Test
       if: github.event_name == 'pull_request'
       working-directory: build
-      run: ctest --timeout 3600 --output-on-failure -C Release -j 2 -E ".ext."
+      run: poetry run invoke test 
 
     - name: Extended Test
       if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
           && github.event_name == 'push'
       working-directory: build
-      run: ctest --timeout 3600 --output-on-failure -C Release -j 2
+      run: poetry run invoke test --extended
 
     - name: Upload artifacts
       if: inputs.store_artifacts

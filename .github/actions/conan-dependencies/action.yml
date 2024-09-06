@@ -4,9 +4,6 @@ inputs:
   JF_ACCESS_TOKEN:
     description: Access token for conan repo
     required: true
-  JF_CONAN_URL:
-    description: URL of conan repo
-    required: true
   BUILD_TYPE:
     description: CMake Build Type
     required: false
@@ -18,15 +15,13 @@ runs:
     - name: Install Conan dependencies
       shell: bash
       run: |
-        pip3 install "conan"
-
         if [ ${{ runner.os }} = macOS ]; then
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
 
-        conan config install https://github.com/BigGeo-GIV/bg-conan.git -t git
-
-        conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
-        conan install . -s build_type=${{ inputs.BUILD_TYPE }} -b=missing -pr:a=${{ runner.os }}
-        conan upload "*" -r bg-conan -c
+        poetry run invoke setup
+        poetry run conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
+        
+        poetry run invoke deps --buildtype ${{ inputs.BUILD_TYPE }}
+        poetry run conan upload "*" -r bg-conan -c
