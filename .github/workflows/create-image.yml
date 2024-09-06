@@ -74,6 +74,7 @@ jobs:
           CONAN_URL=${{ secrets.JF_CONAN_URL }}
           CONAN_USER=github_workflow
           CONAN_PSWD=${{ secrets.JF_ACCESS_TOKEN }}
+          DEV=${{ inputs.dev_version }}}
 
     - name: Build and push bg-search to Snowflake
       uses: docker/build-push-action@v3
