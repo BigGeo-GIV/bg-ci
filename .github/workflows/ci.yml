@@ -106,7 +106,7 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
     - name: Configure
-      run: poetry run config --preset ci-coverage
+      run: poetry run invoke config --preset ci-coverage
 
     - name: Build
       run: poetry run build --preset ci-coverage
