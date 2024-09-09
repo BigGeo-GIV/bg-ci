@@ -256,6 +256,10 @@ jobs:
     - name: Build
       shell: bash
       run: |
+        # Activate virtual environment (next three lines)
+        source $(poetry env info --path)/bin/activate
+        echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
+        echo "PYTHONHOME=" >> $GITHUB_ENV
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         poetry run invoke build --preset ci-${os}
 
