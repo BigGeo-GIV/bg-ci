@@ -24,13 +24,13 @@ runs:
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
 
-        poetry run invoke setup
-        poetry run conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
+        invoke setup
+        conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
         
         if [ ${{ inputs.PYTHON_DEPS }} = true ]; then
-          poetry run invoke deps --buildtype Release --python
+          invoke deps --buildtype Release --python
         else
-          poetry run invoke deps --buildtype ${{ inputs.BUILD_TYPE }} 
+          invoke deps --buildtype ${{ inputs.BUILD_TYPE }} 
         fi
         
-        poetry run conan upload "*" -r bg-conan -c
+        conan upload "*" -r bg-conan -c

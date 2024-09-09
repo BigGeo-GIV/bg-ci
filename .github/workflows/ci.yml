@@ -94,6 +94,8 @@ jobs:
     
     - name: Install Poetry
       uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: false
 
     - name: Install python dependencies
       run: poetry update --no-interaction
@@ -110,10 +112,10 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
     - name: Configure
-      run: poetry run invoke config --no-ninja --preset ci-coverage
+      run: invoke config --no-ninja --preset ci-coverage
 
     - name: Build
-      run: poetry run invoke build --preset ci-coverage
+      run: invoke build --preset ci-coverage
 
     - name: Process coverage info
       run: cmake --build build/coverage -t coverage
@@ -196,6 +198,8 @@ jobs:
     
     - name: Install Poetry
       uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: false
 
     - name: Install python dependencies
       run: poetry update --no-interaction
@@ -251,29 +255,25 @@ jobs:
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        poetry run invoke config --no-ninja --preset "ci-${os}"
+        invoke config --no-ninja --preset "ci-${os}"
 
     - name: Build
       shell: bash
       run: |
-        # Activate virtual environment (next three lines)
-        source $(poetry env info --path)/bin/activate
-        echo "$VIRTUAL_ENV/bin" >> $GITHUB_PATH
-        echo "PYTHONHOME=" >> $GITHUB_ENV
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        poetry run invoke build --preset ci-${os}
+        invoke build --preset ci-${os}
 
     - name: Install
       run: cmake --install build --config Release --prefix prefix
 
     - name: Precheckin Test
       if: github.event_name == 'pull_request'
-      run: poetry run invoke test 
+      run: invoke test 
 
     - name: Extended Test
       if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
           && github.event_name == 'push'
-      run: poetry run invoke test --extended
+      run: invoke test --extended
 
     - name: Upload artifacts
       if: inputs.store_artifacts
@@ -311,6 +311,8 @@ jobs:
     
     - name: Install Poetry
       uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: false
 
     - name: Install python dependencies
       run: poetry update --no-interaction
@@ -346,10 +348,10 @@ jobs:
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        poetry run invoke config --no-ninja --preset "ci-${os}" --python
+        invoke config --no-ninja --preset "ci-${os}" --python
 
     - name: Build Python
-      run: poetry run invoke buildpy
+      run: invoke buildpy
 
     
 
