@@ -254,6 +254,7 @@ jobs:
         poetry run invoke config --no-ninja --preset "ci-${os}"
 
     - name: Build
+      shell: bash
       run: |
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         poetry run invoke build --preset ci-${os}
