@@ -4,6 +4,10 @@ inputs:
   JF_ACCESS_TOKEN:
     description: Access token for conan repo
     required: true
+  PYTHON_DEPS:
+    description: Get Python dependencies
+    required: false
+    default: false
   BUILD_TYPE:
     description: CMake Build Type
     required: false
@@ -23,5 +27,10 @@ runs:
         poetry run invoke setup
         poetry run conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
         
-        poetry run invoke deps --buildtype ${{ inputs.BUILD_TYPE }}
+        if [ ${{ inputs.PYTHON_DEPS }} = true ]; then
+          poetry run invoke deps --buildtype Release --python
+        else
+          poetry run invoke deps --buildtype ${{ inputs.BUILD_TYPE }} 
+        fi
+        
         poetry run conan upload "*" -r bg-conan -c

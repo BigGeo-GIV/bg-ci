@@ -23,6 +23,10 @@ on:
         required: false
         default: false
         type: boolean
+      build_python:
+        required: false
+        default: false
+        type: boolean
     secrets:
       GH_ACCESS:
         required: true
@@ -101,7 +105,7 @@ jobs:
         sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -137,7 +141,7 @@ jobs:
   #     with: { python-version: "3.8" }
 
   #   - name: Dependencies
-  #     uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+  #     uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
   #     with:
   #       JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
   #       JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
@@ -213,7 +217,7 @@ jobs:
         /usr/local/opt/llvm@16/bin/clang++ --version
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -272,6 +276,100 @@ jobs:
       with:
         name: ${{ matrix.os }}-executable
         path: build/
+
+  build-python:
+    # Run build python only when lint succeed
+    needs: [lint]
+
+    env: {CONAN_REVISIONS_ENABLED: 1}
+
+    if: inputs.build_docs
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: ${{ fromJson(inputs.test_os_matrix) }}
+
+    runs-on: ${{ matrix.os }}
+    
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+    - uses: actions/checkout@v3
+      with: { submodules: recursive }
+
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with: { python-version: "3.10" }
+    
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+
+    - name: Install python dependencies
+      run: poetry update --no-interaction
+
+    - name: Install clang and gcc
+      if: matrix.os == 'ubuntu-22.04'
+      run: |
+        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
+        chmod +x /opt/llvm.sh
+        sudo /opt/llvm.sh 16
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
+        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
+
+    - name: Install llvm clang
+      if: matrix.os == 'macos-12'
+      run: |
+        brew install llvm@16
+        /usr/local/opt/llvm@16/bin/clang++ --version
+
+    - name: Dependencies
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
+      with:
+        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+        PYTHON_DEPS: true
+
+    - name: Upload to conan
+      shell: bash
+      if: matrix.os == 'ubuntu-22.04'
+        && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+        && github.event_name == 'push'
+        && inputs.conan_create
+      run: |
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm@16/bin/clang
+          export CXX=/usr/local/opt/llvm@16/bin/clang++
+        fi
+        export CONAN_DEV_PACKAGE=1
+        if [ ${{ github.ref }} = refs/heads/main ]; then
+          export CONAN_DEV_PACKAGE=0
+        fi
+        conan create . -b missing -pr:a bg-profile
+        nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
+        verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
+        nameVer=$(echo ${name}/${ver})
+        conan upload ${nameVer} -r bg-conan -c
+
+    - name: Configure
+      shell: bash
+      env: { CC: clang-16, CXX: clang++-16 }
+      run: |
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm@16/bin/clang
+          export CXX=/usr/local/opt/llvm@16/bin/clang++
+        fi
+        osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
+        poetry run invoke config --no-ninja --preset "ci-${os} --python"
+
+    - name: Build Python
+      run: |
+        osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
+        poetry run invoke buildpy
+
+    
 
   docs:
     # Deploy docs only when builds succeed
