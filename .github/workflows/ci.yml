@@ -106,7 +106,7 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
     - name: Configure
-      run: poetry run invoke config --preset ci-coverage
+      run: poetry run invoke config --no-ninja --preset ci-coverage
 
     - name: Build
       run: poetry run build --preset ci-coverage
@@ -243,7 +243,7 @@ jobs:
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        poetry run invoke config --preset "ci-${os}"
+        poetry run invoke config --no-ninja --preset "ci-${os}"
 
     - name: Build
       run: |
