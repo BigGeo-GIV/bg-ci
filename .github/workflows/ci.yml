@@ -109,7 +109,7 @@ jobs:
       run: poetry run invoke config --no-ninja --preset ci-coverage
 
     - name: Build
-      run: poetry run build --preset ci-coverage
+      run: poetry run invoke build --preset ci-coverage
 
     - name: Process coverage info
       run: cmake --build build/coverage -t coverage
@@ -248,7 +248,7 @@ jobs:
     - name: Build
       run: |
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        poetry run build --preset ci-${os}
+        poetry run invoke build --preset ci-${os}
 
     - name: Install
       run: cmake --install build --config Release --prefix prefix
