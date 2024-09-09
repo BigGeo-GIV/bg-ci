@@ -283,7 +283,7 @@ jobs:
 
     env: {CONAN_REVISIONS_ENABLED: 1}
 
-    if: inputs.build_docs
+    if: inputs.build_python
 
     strategy:
       fail-fast: false
@@ -332,27 +332,6 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
         PYTHON_DEPS: true
 
-    - name: Upload to conan
-      shell: bash
-      if: matrix.os == 'ubuntu-22.04'
-        && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-        && github.event_name == 'push'
-        && inputs.conan_create
-      run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
-        export CONAN_DEV_PACKAGE=1
-        if [ ${{ github.ref }} = refs/heads/main ]; then
-          export CONAN_DEV_PACKAGE=0
-        fi
-        conan create . -b missing -pr:a bg-profile
-        nameAry=($(conan inspect . | grep name | tr ":" "\n")) && name=${nameAry[1]}
-        verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
-        nameVer=$(echo ${name}/${ver})
-        conan upload ${nameVer} -r bg-conan -c
-
     - name: Configure
       shell: bash
       env: { CC: clang-16, CXX: clang++-16 }
@@ -365,9 +344,7 @@ jobs:
         poetry run invoke config --no-ninja --preset "ci-${os}" --python
 
     - name: Build Python
-      run: |
-        osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        poetry run invoke buildpy
+      run: poetry run invoke buildpy
 
     
 
