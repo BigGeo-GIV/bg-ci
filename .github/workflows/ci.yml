@@ -177,6 +177,10 @@ jobs:
         os: ${{ fromJson(inputs.test_os_matrix) }}
 
     runs-on: ${{ matrix.os }}
+    
+    defaults:
+      run:
+        shell: bash
 
     steps:
     - uses: actions/checkout@v3
