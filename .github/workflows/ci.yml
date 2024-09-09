@@ -362,7 +362,7 @@ jobs:
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        poetry run invoke config --no-ninja --preset "ci-${os} --python"
+        poetry run invoke config --no-ninja --preset "ci-${os}" --python
 
     - name: Build Python
       run: |
