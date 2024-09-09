@@ -259,13 +259,11 @@ jobs:
 
     - name: Precheckin Test
       if: github.event_name == 'pull_request'
-      working-directory: build
       run: poetry run invoke test 
 
     - name: Extended Test
       if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
           && github.event_name == 'push'
-      working-directory: build
       run: poetry run invoke test --extended
 
     - name: Upload artifacts
