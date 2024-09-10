@@ -91,7 +91,7 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
-    
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
@@ -183,7 +183,7 @@ jobs:
         os: ${{ fromJson(inputs.test_os_matrix) }}
 
     runs-on: ${{ matrix.os }}
-    
+
     defaults:
       run:
         shell: bash
@@ -195,7 +195,7 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
-    
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
@@ -268,7 +268,7 @@ jobs:
 
     - name: Precheckin Test
       if: github.event_name == 'pull_request'
-      run: invoke test 
+      run: invoke test
 
     - name: Extended Test
       if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
@@ -296,7 +296,7 @@ jobs:
         os: ${{ fromJson(inputs.test_os_matrix) }}
 
     runs-on: ${{ matrix.os }}
-    
+
     defaults:
       run:
         shell: bash
@@ -308,7 +308,7 @@ jobs:
     - name: Install Python
       uses: actions/setup-python@v4
       with: { python-version: "3.10" }
-    
+
     - name: Install Poetry
       uses: snok/install-poetry@v1
       with:
@@ -351,9 +351,14 @@ jobs:
         invoke config --no-ninja --preset "ci-${os}" --python
 
     - name: Build Python
-      run: invoke buildpy
+      env: { CC: clang-16, CXX: clang++-16 }
+      run: |
+        if [ ${{ matrix.os }} = macos-12 ]; then
+          export CC=/usr/local/opt/llvm@16/bin/clang
+          export CXX=/usr/local/opt/llvm@16/bin/clang++
+        fi
+        invoke buildpy
 
-    
 
   docs:
     # Deploy docs only when builds succeed
