@@ -9,18 +9,15 @@ on:
       BG_VERSION:
         required: true
         type: string
-      # SAS_TOKEN:
-      #   required: true
-      #   type: string
-      # SNOWSQL_ACCOUNT:
-      #   required: true
-      #   type: string
-      # SNOWSQL_USER:
-      #   required: true
-      #   type: string
-      # SNOWSQL_PWD:
-      #   required: true
-      #   type: string
+    secrets:
+      SAS_TOKEN:
+        required: true
+      SNOWSQL_ACCOUNT:
+        required: true
+      SNOWSQL_USER:
+        required: true
+      SNOWSQL_PWD:
+        required: true
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
