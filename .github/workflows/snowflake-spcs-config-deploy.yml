@@ -31,7 +31,7 @@ jobs:
     env:
       SNOWSQL_DEST: ~/snowflake
       SNOWSQL_ACCOUNT: ${{secrets.SNOWSQL_ACCOUNT}}
-      SNOWSQL_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWSQL_USER: ${{secrets.SNOWSQL_USER}}
       SNOWSQL_PWD: ${{secrets.SNOWSQL_PWD}}
       SAS_TOKEN: ${{secrets.SAS_TOKEN}}
       
