@@ -31,7 +31,7 @@ jobs:
 
     env:
       SNOWSQL_DEST: ~/snowflake
-      SNOWSQL_ACCOUNT: ${{inputs.SNOWFLAKE_ACCOUNT_OREGON_URL}}
+      SNOWSQL_ACCOUNT: ${{inputs.SNOWSQL_ACCOUNT}}
       SNOWSQL_USER: ${{inputs.SNOWFLAKE_USER}}
       SNOWSQL_PWD: ${{inputs.SNOWSQL_PWD}}
       SAS_TOKEN: ${{inputs.SAS_TOKEN}}
