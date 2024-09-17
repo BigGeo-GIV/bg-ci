@@ -38,6 +38,13 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
+      - uses: actions/checkout@v3
+        with:
+          repository: BigGeo-GIV/bg-ci
+          ref: main
+          path: bg-ci
+          token: ${{ secrets.GH_ACCESS }}
+
       - name: Extract branch name
         shell: bash
         run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
