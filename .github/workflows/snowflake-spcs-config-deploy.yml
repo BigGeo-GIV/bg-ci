@@ -67,7 +67,7 @@ jobs:
 
       - name: Inject version and tag into biggeo-a.yaml
         run: |
-          python3 bg-ci/inject_version_spcs.py biggeo-a.yaml ${{ inputs.BG_VERSION }} ${{ github.ref }} ${{ secrets.SAS_TOKEN }}
+          python3 bg-ci/inject_version_spcs.py biggeo-a.yaml ${{ inputs.BG_VERSION }} ${{ github.ref }} "${{ secrets.SAS_TOKEN }}"
           python3 bg-ci/inject_version_spcs.py biggeo-b.yaml ${{ inputs.BG_VERSION }} ${{ github.ref }}
           python3 bg-ci/inject_version_spcs.py manifest.yml ${{ inputs.BG_VERSION }} ${{ github.ref }}
           python3 bg-ci/inject_resource_limit_spcs.py biggeo-a.yaml
