@@ -9,18 +9,18 @@ on:
       BG_VERSION:
         required: true
         type: string
-      SAS_TOKEN:
-        required: true
-        type: string
-      SNOWSQL_ACCOUNT:
-        required: true
-        type: string
-      SNOWSQL_USER:
-        required: true
-        type: string
-      SNOWSQL_PWD:
-        required: true
-        type: string
+      # SAS_TOKEN:
+      #   required: true
+      #   type: string
+      # SNOWSQL_ACCOUNT:
+      #   required: true
+      #   type: string
+      # SNOWSQL_USER:
+      #   required: true
+      #   type: string
+      # SNOWSQL_PWD:
+      #   required: true
+      #   type: string
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -31,10 +31,10 @@ jobs:
 
     env:
       SNOWSQL_DEST: ~/snowflake
-      SNOWSQL_ACCOUNT: ${{inputs.SNOWSQL_ACCOUNT}}
-      SNOWSQL_USER: ${{inputs.SNOWFLAKE_USER}}
-      SNOWSQL_PWD: ${{inputs.SNOWSQL_PWD}}
-      SAS_TOKEN: ${{inputs.SAS_TOKEN}}
+      SNOWSQL_ACCOUNT: ${{secrets.SNOWSQL_ACCOUNT}}
+      SNOWSQL_USER: ${{secrets.SNOWFLAKE_USER}}
+      SNOWSQL_PWD: ${{secrets.SNOWSQL_PWD}}
+      SAS_TOKEN: ${{secrets.SAS_TOKEN}}
       
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
