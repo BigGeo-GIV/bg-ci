@@ -338,17 +338,6 @@ jobs:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
         PYTHON_DEPS: true
 
-    - name: Configure
-      shell: bash
-      env: { CC: clang-16, CXX: clang++-16 }
-      run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
-        osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
-        invoke config --no-ninja --preset "ci-${os}" --python
-
     - name: Build Python
       env: { CC: clang-16, CXX: clang++-16 }
       run: |
@@ -358,7 +347,6 @@ jobs:
         fi
         invoke buildpy
         invoke testpy
-
 
   docs:
     # Deploy docs only when builds succeed
