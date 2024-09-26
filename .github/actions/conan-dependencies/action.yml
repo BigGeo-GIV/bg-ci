@@ -26,11 +26,11 @@ runs:
 
         invoke setup
         conan remote login -p ${{ inputs.JF_ACCESS_TOKEN }} bg-conan github_workflow
-        
+
         if [ ${{ inputs.PYTHON_DEPS }} = true ]; then
-          invoke deps --buildtype Release --python
+          invoke deps --buildtype Release
         else
-          invoke deps --buildtype ${{ inputs.BUILD_TYPE }} 
+          invoke deps --buildtype ${{ inputs.BUILD_TYPE }}
         fi
-        
+
         conan upload "*" -r bg-conan -c
