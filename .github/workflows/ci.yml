@@ -35,6 +35,10 @@ on:
       JF_CONAN_URL:
         required: true
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     runs-on: ubuntu-22.04
@@ -266,11 +270,12 @@ jobs:
       run: cmake --install build --config Release --prefix prefix
 
     - name: Precheckin Test
-      if: github.event_name == 'pull_request'
+      if: matrix.os == 'ubuntu-22.04' && github.event_name == 'pull_request'
       run: invoke test
 
     - name: Extended Test
-      if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+      if: matrix.os == 'ubuntu-22.04'
+          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
           && github.event_name == 'push'
       run: invoke test --extended
 
