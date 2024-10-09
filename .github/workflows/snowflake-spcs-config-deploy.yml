@@ -119,7 +119,7 @@ jobs:
           ~/snowflake/snowsql -d BG_DEV -s DATA_SCHEMA -f files_to_upload.sql
 
       - name: Upload Files to Dev SPCS Stage
-        if: github.ref != 'refs/heads/stage' && github.ref !='refs/heads/main' && github.ref !='refs/heads/SP'
+        if: github.ref != 'refs/heads/stage' && github.ref !='refs/heads/main' && github.ref !='refs/heads/SP' && github.ref !='refs/heads/SP2'
         run: |
           for f in $(cat files_to_upload.txt); do
             echo "PUT file://${f} @BG_DEV.${{steps.extract_branch.outputs.branch}}.NA_SPCS_FILES_${{steps.extract_branch.outputs.branch}} AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
