@@ -96,6 +96,17 @@ jobs:
           done
           ~/snowflake/snowsql -d BG_DEV -s DATA_SCHEMA -f files_to_upload.sql
 
+      - name: Upload Files to SPCS S&P 2.0 Stage
+        if: github.ref == 'refs/heads/SP2'
+        run: |
+          for f in $(cat files_to_upload.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_SP2 AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          for f in $(cat files_to_upload_streamlit.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_SP2/streamlit AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          ~/snowflake/snowsql -d BG_DEV -s DATA_SCHEMA -f files_to_upload.sql
+
       - name: Upload Files to RELEASE Stage
         if: github.ref == 'refs/heads/main'
         run: |
