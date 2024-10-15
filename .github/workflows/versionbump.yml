@@ -2,10 +2,6 @@ name: Version Bump
 
 on:
   workflow_call:
-    inputs:
-      name:
-        required: true
-        type: string
     secrets:
       GH_ACCESS:
         required: true
@@ -23,7 +19,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: main
+        ref: v3.x
         path: bg-ci
         token: ${{ secrets.GH_ACCESS }}
 
@@ -45,22 +41,18 @@ jobs:
           gh pr view --json commits > prevMsgs.json
           file=prevMsgs.json
           dev=false
-          messagePrefix="v"
           messageSuffix=""
         else
           git log -1 --pretty=%B > prevMsg.txt
           file=prevMsg.txt
           dev=true
-          messagePrefix="dev"
           messageSuffix=" - $(cat prevMsg.txt)"
         fi
 
-        didBump=$(python3 bg-ci/BumpVersion.py version.json ${file} ${{ inputs.name }} ${dev})
+        bumps=$(python3 bg-ci/BumpVersion.py version.json ${file} ${dev})
 
-        if [ "${didBump}" = "bump" ]; then
-          git add version.json
-          newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} ${dev})
-          git commit -m "${messagePrefix}${newVer}${messageSuffix}"
+        git add version.json
+        if git commit -m "${bumps}${messageSuffix}"; then
           git pull
           git push
         fi
