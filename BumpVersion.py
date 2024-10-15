@@ -26,6 +26,8 @@ def commitTxtToIdx(commitText, allowMajor, alwaysBump):
         return 2
     elif "infra" in cType:
         return 10
+    elif "docs" in cType:
+        return 10;
     else:
         return 1 if alwaysBump else 10 # bump minor if commit didn't match a pattern just to be safe
 
