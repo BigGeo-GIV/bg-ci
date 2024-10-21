@@ -162,11 +162,11 @@ jobs:
         invoke build --preset ci-${os}
 
     - name: Precheckin Test
-      if: matrix.os == 'ubuntu-22.04' && github.event_name == 'pull_request'
+      if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18' && github.event_name == 'pull_request'
       run: invoke test
 
     - name: Extended Test
-      if: matrix.os == 'ubuntu-22.04'
+      if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
           && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
           && github.event_name == 'push'
       run: invoke test --extended
@@ -205,7 +205,6 @@ jobs:
           echo "CC=$(brew --prefix llvm@18)/bin/clang" >> $GITHUB_ENV
           echo "CXX=$(brew --prefix llvm@18)/bin/clang++" >> $GITHUB_ENV
         fi
-
 
     - uses: actions/checkout@v3
       with: { submodules: recursive }
