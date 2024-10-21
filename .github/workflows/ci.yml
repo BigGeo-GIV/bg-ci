@@ -89,6 +89,7 @@ jobs:
         - os: ubuntu-22.04
           cc: gcc-13
           cxx: g++-13
+          pci: true
         - os: ubuntu-22.04
           cc: gcc-14
           cxx: g++-15
@@ -104,14 +105,16 @@ jobs:
         - os: macos-13
           cc: /opt/homebrew/opt/llvm@18/bin/clang
           cxx: /opt/homebrew/opt/llvm@18/bin/clang++
+          pci: true
         - os: windows-2022
           cc: cl.exe
           cxx: cl.exe
+          pci: true
 
     runs-on: ${{ matrix.os }}
     env:
-      CC: matrix.cc
-      CXX: matrix.cxx
+      CC: ${{ matrix.cc }}
+      CXX: ${{ matrix.cxx }}
 
     defaults:
       run:
