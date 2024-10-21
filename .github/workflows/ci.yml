@@ -26,6 +26,8 @@ concurrency:
 jobs:
   lint:
     runs-on: ubuntu-22.04
+    outputs:
+      comps: ${{ steps.comps.outputs.comps }}
 
     steps:
     - uses: actions/checkout@v3
@@ -34,6 +36,16 @@ jobs:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.head_ref }}
         submodules: recursive
+
+    - name: Get comps to test
+      id: comps
+      run: |
+        if [(${{ github.ref }} == 'refs/heads/main' || ${{ github.ref }} == 'refs/heads/develop')
+            && ${{ github.event_name }} == 'push' ]; then
+          echo "[[gcc,12], [gcc,13], [gcc,14], [clang,16], [clang,17], [clang,18]]" >> "$GITHUB_OUTPUT"
+        else
+          echo "[[gcc,13], [clang,18]]" >> "$GITHUB_OUTPUT"
+        fi
 
     - uses: actions/setup-python@v4
       with: { python-version: "3.10" }
@@ -67,7 +79,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04]
-        comp: [[gcc,12], [gcc,13], [gcc,14], [clang,16], [clang,17], [clang,18]]
+        comp: ${{ fromJson(needs.lint.outputs.comps) }}
         include:
         - os: macos-13
         - os: macos-14
@@ -87,10 +99,10 @@ jobs:
     - name: Set ENV
       run: |
         if [ ${{ matrix.comp[0] }} = gcc ]; then
-          echo "CC=gcc-${{ matrix.comp[0] }}" >> $GITHUB_ENV
+          echo "CC=gcc-${{ matrix.comp[1] }}" >> $GITHUB_ENV
           echo "CXX=g++-${{ matrix.comp[1] }}" >> $GITHUB_ENV
         elif [ ${{ matrix.comp[0] }} = clang ]; then
-          echo "CC=clang-${{ matrix.comp[0] }}" >> $GITHUB_ENV
+          echo "CC=clang-${{ matrix.comp[1] }}" >> $GITHUB_ENV
           echo "CXX=clang++-${{ matrix.comp[1] }}" >> $GITHUB_ENV
         elif [ ${{ runner.os }} = macOS ]; then
           echo "CC=$(brew --prefix llvm@18)/bin/clang" >> $GITHUB_ENV
