@@ -43,12 +43,12 @@ jobs:
         if [[ ('${{ github.ref }}' == 'refs/heads/main' || '${{ github.ref }}' == 'refs/heads/develop') \
             && '${{ github.event_name }}' == 'push' ]]; then
           comps='[["gcc", 12], ["gcc", 13], ["gcc", 14], ["clang", 16], ["clang", 17], ["clang", 18]]'
-          incs='["os": "macos-13", "os": "macos-14", "os": "windows-2022"]'
+          incs='[{"os": "macos-13"}, {"os": "macos-14"}, {"os": "windows-2022"}]'
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         else
           comps='[["gcc", 13], ["clang", 18]]'
-          incs='["os": "macos-14", "os": "windows-2022"]'
+          incs='[{"os": "macos-14"}, {"os": "windows-2022"}]'
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         fi
 
