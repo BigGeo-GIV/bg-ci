@@ -113,7 +113,6 @@ jobs:
 
     steps:
     - name: Set ENV
-      if: ${{ matrix.comp }}
       run: |
         if [ ${{ matrix.comp }} = gcc ]; then
           echo "CC=gcc-${{ matrix.compv }}" >> $GITHUB_ENV
