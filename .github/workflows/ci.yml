@@ -40,7 +40,7 @@ jobs:
     - name: Get comps to test
       id: comps
       run: |
-        if [ (${{ github.ref }} == 'refs/heads/main' || ${{ github.ref }} == 'refs/heads/develop')
+        if [ (${{ github.ref }} == 'refs/heads/main' || ${{ github.ref }} == 'refs/heads/develop')\
             && ${{ github.event_name }} == 'push' ]; then
           echo "[[gcc,12], [gcc,13], [gcc,14], [clang,16], [clang,17], [clang,18]]" >> "$GITHUB_OUTPUT"
         else
