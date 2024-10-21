@@ -7,22 +7,6 @@ on:
         required: false
         default: false
         type: boolean
-      test_os_matrix:
-        required: false
-        default: "['ubuntu-22.04', 'windows-2022', 'macos-12']"
-        type: string
-      build_docs:
-        required: false
-        default: false
-        type: boolean
-      store_artifacts:
-        required: false
-        default: false
-        type: boolean
-      docker_deploy:
-        required: false
-        default: false
-        type: boolean
       build_python:
         required: false
         default: false
@@ -83,21 +67,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        # - os: ubuntu-24.04
-        #   comp: gcc
-        #   compv: 12
-        # - os: ubuntu-24.04
-        #   comp: gcc
-        #   compv: 13
-        # - os: ubuntu-24.04
-        #   comp: gcc
-        #   compv: 14
-        # - os: ubuntu-24.04
-        #   comp: clang
-        #   compv: 16
-        # - os: ubuntu-24.04
-        #   comp: clang
-        #   compv: 17
+        - os: ubuntu-24.04
+          comp: gcc
+          compv: 12
+        - os: ubuntu-24.04
+          comp: gcc
+          compv: 13
+        - os: ubuntu-24.04
+          comp: gcc
+          compv: 14
+        - os: ubuntu-24.04
+          comp: clang
+          compv: 16
+        - os: ubuntu-24.04
+          comp: clang
+          compv: 17
         - os: ubuntu-24.04
           comp: clang
           compv: 18
@@ -145,9 +129,11 @@ jobs:
       run: poetry update --no-interaction
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@testing
-      with:
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+      run: |
+        invoke setup
+        conan remote login -p ${{ secrets.JF_ACCESS_TOKEN }} bg-conan github_workflow
+        invoke deps --buildtype Release
+        conan upload "*" -r bg-conan -c
 
     - name: Upload to conan
       shell: bash
@@ -177,9 +163,6 @@ jobs:
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         invoke build --preset ci-${os}
 
-    - name: Install
-      run: cmake --install build --config Release --prefix prefix
-
     - name: Precheckin Test
       if: matrix.os == 'ubuntu-22.04' && github.event_name == 'pull_request'
       run: invoke test
@@ -201,7 +184,7 @@ jobs:
         - os: ubuntu-24.04
           comp: clang
           compv: 18
-        - os: macos-13
+        - os: macos-14
         - os: windows-2022
 
     runs-on: ${{ matrix.os }}
@@ -211,8 +194,11 @@ jobs:
         shell: bash
 
     steps:
+    - name: Install llvm clang
+      if: runner.os == 'macOS'
+      run: brew install llvm@18
+
     - name: Set ENV
-      if: ${{ matrix.comp }}
       run: |
         if [ ${{ matrix.comp }} = gcc ]; then
           echo "CC=gcc-${{ matrix.compv }}" >> $GITHUB_ENV
@@ -220,9 +206,9 @@ jobs:
         elif [ ${{ matrix.comp }} = clang ]; then
           echo "CC=clang-${{ matrix.compv }}" >> $GITHUB_ENV
           echo "CXX=clang++-${{ matrix.compv }}" >> $GITHUB_ENV
-        elif [ ${{ matrix.os }} = macos-13 ]; then
-          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-${{ matrix.compv }}" >> $GITHUB_ENV
-          echo "CXX=/opt/homebrew/opt/llvm@18/bin/clang++-${{ matrix.compv }}" >> $GITHUB_ENV
+        elif [ ${{ runner.os }} = macOS ]; then
+          echo "CC=$(brew --prefix llvm@18)/bin/clang" >> $GITHUB_ENV
+          echo "CXX=$(brew --prefix llvm@18)/bin/clang++" >> $GITHUB_ENV
         fi
 
     - uses: actions/checkout@v3
@@ -240,16 +226,11 @@ jobs:
     - name: Install python dependencies
       run: poetry update --no-interaction
 
-    - name: Install llvm clang
-      if: matrix.os == 'macos-14'
-      run: |
-        brew install llvm@18
-
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@testing
-      with:
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-        PYTHON_DEPS: true
+      run: |
+        invoke setup
+        conan remote login -p ${{ secrets.JF_ACCESS_TOKEN }} bg-conan github_workflow
+        invoke deps --buildtype Release
 
     - name: Build Python
       env: { CC: clang-16, CXX: clang++-16 }
