@@ -121,7 +121,7 @@ jobs:
         elif [ ${{ matrix.comp }} = clang ]; then
           echo "CC=clang-${{ matrix.compv }}" >> $GITHUB_ENV
           echo "CXX=clang++-${{ matrix.compv }}" >> $GITHUB_ENV
-        elif [ ${{ matrix.os }} = macos-13 ]; then
+        elif [ ${{ runner.os }} = macOS ]; then
           echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-${{ matrix.compv }}" >> $GITHUB_ENV
           echo "CXX=/opt/homebrew/opt/llvm@18/bin/clang++-${{ matrix.compv }}" >> $GITHUB_ENV
         fi
@@ -142,7 +142,7 @@ jobs:
       run: poetry update --no-interaction
 
     - name: Install llvm clang
-      if: matrix.os == 'macos-14'
+      if: runner.os == 'macOS'
       run: |
         brew install llvm@18
 
