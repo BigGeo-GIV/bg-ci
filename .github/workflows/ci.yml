@@ -112,6 +112,10 @@ jobs:
         shell: bash
 
     steps:
+    - name: Install llvm clang
+      if: runner.os == 'macOS'
+      run: brew install llvm@18
+
     - name: Set ENV
       run: |
         if [ ${{ matrix.comp }} = gcc ]; then
@@ -121,8 +125,8 @@ jobs:
           echo "CC=clang-${{ matrix.compv }}" >> $GITHUB_ENV
           echo "CXX=clang++-${{ matrix.compv }}" >> $GITHUB_ENV
         elif [ ${{ runner.os }} = macOS ]; then
-          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-18" >> $GITHUB_ENV
-          echo "CXX=/opt/homebrew/opt/llvm@18/bin/clang++-18" >> $GITHUB_ENV
+          echo "CC=$(brew --prefix llvm@18)/bin/clang-18" >> $GITHUB_ENV
+          echo "CXX=$(brew --prefix llvm@18)/bin/clang++-18" >> $GITHUB_ENV
         fi
 
     - uses: actions/checkout@v3
@@ -139,11 +143,6 @@ jobs:
 
     - name: Install python dependencies
       run: poetry update --no-interaction
-
-    - name: Install llvm clang
-      if: runner.os == 'macOS'
-      run: |
-        brew install llvm@18
 
     - name: Dependencies
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@testing
