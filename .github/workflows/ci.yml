@@ -232,7 +232,6 @@ jobs:
         invoke deps --buildtype Release
 
     - name: Build Python
-      env: { CC: clang-16, CXX: clang++-16 }
       run: |
         invoke pyinstall
         invoke pytest
