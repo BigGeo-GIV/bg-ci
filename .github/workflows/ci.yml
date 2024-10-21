@@ -83,44 +83,49 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: ubuntu-22.04
-          cc: gcc-12
-          cxx: g++-12
-        - os: ubuntu-22.04
-          cc: gcc-13
-          cxx: g++-13
-          pci: true
-        - os: ubuntu-22.04
-          cc: gcc-14
-          cxx: g++-15
-        - os: ubuntu-22.04
-          cc: clang-16
-          cxx: clang++-16
-        - os: ubuntu-22.04
-          cc: clang-17
-          cxx: clang++-17
-        - os: ubuntu-22.04
-          cc: clang-18
-          cxx: clang++-18
+        - os: ubuntu-24.04
+          comp: gcc
+          compv: 12
+        - os: ubuntu-24.04
+          comp: gcc
+          compv: 13
+        - os: ubuntu-24.04
+          comp: gcc
+          compv: 14
+        - os: ubuntu-24.04
+          comp: clang
+          compv: 16
+        - os: ubuntu-24.04
+          comp: clang
+          compv: 17
+        - os: ubuntu-24.04
+          comp: clang
+          compv: 18
         - os: macos-13
-          cc: /opt/homebrew/opt/llvm@18/bin/clang
-          cxx: /opt/homebrew/opt/llvm@18/bin/clang++
-          pci: true
         - os: windows-2022
-          cc: cl.exe
-          cxx: cl.exe
-          pci: true
 
     runs-on: ${{ matrix.os }}
-    env:
-      CC: ${{ matrix.cc }}
-      CXX: ${{ matrix.cxx }}
 
     defaults:
       run:
         shell: bash
 
     steps:
+    - name: Set ENV
+      if: ${{ matrix.comp }}
+      run: |
+        if [ ${{ matrix.comp }} = gcc ]; then
+          echo "CC=gcc-${{ matrix.compv }} >> $GITHUB_ENV
+          echo "CC=g++-${{ matrix.compv }} >> $GITHUB_ENV
+        elif [ ${{ matrix.comp }} = clang ]; then
+          echo "CC=clang-${{ matrix.compv }} >> $GITHUB_ENV
+          echo "CC=clang++-${{ matrix.compv }} >> $GITHUB_ENV
+        fi
+        elif [ ${{ matrix.os }} = macos-13 ]; then
+          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-${{ matrix.compv }} >> $GITHUB_ENV
+          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang++-${{ matrix.compv }} >> $GITHUB_ENV
+        fi
+
     - uses: actions/checkout@v3
       with: { submodules: recursive }
 
@@ -142,7 +147,7 @@ jobs:
         brew install llvm@18
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@v3.x
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@testing
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
 
@@ -196,7 +201,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: ubuntu-22.04
+        - os: ubuntu-24.04
           cc: clang-18
           cxx: clang++-18
         - os: macos-13
@@ -238,7 +243,7 @@ jobs:
         brew install llvm@18
 
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@v3.x
+      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@testing
       with:
         JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
         PYTHON_DEPS: true
