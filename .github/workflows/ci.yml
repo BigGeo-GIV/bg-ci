@@ -116,13 +116,13 @@ jobs:
       run: |
         if [ ${{ matrix.comp }} = gcc ]; then
           echo "CC=gcc-${{ matrix.compv }} >> $GITHUB_ENV
-          echo "CC=g++-${{ matrix.compv }} >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.compv }} >> $GITHUB_ENV
         elif [ ${{ matrix.comp }} = clang ]; then
           echo "CC=clang-${{ matrix.compv }} >> $GITHUB_ENV
-          echo "CC=clang++-${{ matrix.compv }} >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.compv }} >> $GITHUB_ENV
         elif [ ${{ matrix.os }} = macos-13 ]; then
           echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-${{ matrix.compv }} >> $GITHUB_ENV
-          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang++-${{ matrix.compv }} >> $GITHUB_ENV
+          echo "CXX=/opt/homebrew/opt/llvm@18/bin/clang++-${{ matrix.compv }} >> $GITHUB_ENV
         fi
 
     - uses: actions/checkout@v3
