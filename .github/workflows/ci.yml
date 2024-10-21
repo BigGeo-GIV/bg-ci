@@ -27,7 +27,8 @@ jobs:
   lint:
     runs-on: ubuntu-22.04
     outputs:
-      comps: ${{ steps.comps.outputs.comps }}
+      incs:  ${{ steps.matrix.outputs.incs }}
+      comps: ${{ steps.matrix.outputs.comps }}
 
     steps:
     - uses: actions/checkout@v3
@@ -37,16 +38,18 @@ jobs:
         ref: ${{ github.head_ref }}
         submodules: recursive
 
-    - name: Get comps to test
-      id: comps
+    - id: matrix
       run: |
         if [[ ('${{ github.ref }}' == 'refs/heads/main' || '${{ github.ref }}' == 'refs/heads/develop') \
             && '${{ github.event_name }}' == 'push' ]]; then
           comps='[["gcc", 12], ["gcc", 13], ["gcc", 14], ["clang", 16], ["clang", 17], ["clang", 18]]'
+          incs='["os": "macos-13", "os": "macos-14", "os": "windows-2022"]'
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
+          echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         else
           comps='[["gcc", 13], ["clang", 18]]'
-          echo "comps=${comps}" >> "$GITHUB_OUTPUT"
+          incs='["os": "macos-14", "os": "windows-2022"]'
+          echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         fi
 
     - uses: actions/setup-python@v4
@@ -82,10 +85,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04]
         comp: ${{ fromJson(needs.lint.outputs.comps) }}
-        include:
-        - os: macos-13
-        - os: macos-14
-        - os: windows-2022
+        include: ${{ fromJson(needs.lint.outputs.incs) }}
 
     runs-on: ${{ matrix.os }}
 
@@ -180,10 +180,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04]
         comp: [["clang", 18]]
-        include:
-        - os: macos-13
-        - os: macos-14
-        - os: windows-2022
+        include: ${{ fromJson(needs.lint.outputs.incs) }}
 
     runs-on: ${{ matrix.os }}
 
