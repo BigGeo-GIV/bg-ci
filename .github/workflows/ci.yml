@@ -194,33 +194,38 @@ jobs:
   build-python:
     # Run build python only when lint succeed
     needs: [lint]
-    if: inputs.build_python
 
     strategy:
       fail-fast: false
       matrix:
         include:
         - os: ubuntu-24.04
-          cc: clang-18
-          cxx: clang++-18
+          comp: clang
+          compv: 18
         - os: macos-13
-          cc: /opt/homebrew/opt/llvm@18/bin/clang
-          cxx: /opt/homebrew/opt/llvm@18/bin/clang++
         - os: windows-2022
-          cc: cl.exe
-          cxx: cl.exe
 
     runs-on: ${{ matrix.os }}
-
-    env:
-      CC: matrix.cc
-      CXX: matrix.cxx
 
     defaults:
       run:
         shell: bash
 
     steps:
+    - name: Set ENV
+      if: ${{ matrix.comp }}
+      run: |
+        if [ ${{ matrix.comp }} = gcc ]; then
+          echo "CC=gcc-${{ matrix.compv }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.compv }}" >> $GITHUB_ENV
+        elif [ ${{ matrix.comp }} = clang ]; then
+          echo "CC=clang-${{ matrix.compv }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.compv }}" >> $GITHUB_ENV
+        elif [ ${{ matrix.os }} = macos-13 ]; then
+          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-${{ matrix.compv }}" >> $GITHUB_ENV
+          echo "CXX=/opt/homebrew/opt/llvm@18/bin/clang++-${{ matrix.compv }}" >> $GITHUB_ENV
+        fi
+
     - uses: actions/checkout@v3
       with: { submodules: recursive }
 
