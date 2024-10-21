@@ -121,8 +121,8 @@ jobs:
           echo "CC=clang-${{ matrix.compv }}" >> $GITHUB_ENV
           echo "CXX=clang++-${{ matrix.compv }}" >> $GITHUB_ENV
         elif [ ${{ runner.os }} = macOS ]; then
-          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-${{ matrix.compv }}" >> $GITHUB_ENV
-          echo "CXX=/opt/homebrew/opt/llvm@18/bin/clang++-${{ matrix.compv }}" >> $GITHUB_ENV
+          echo "CC=/opt/homebrew/opt/llvm@18/bin/clang-18" >> $GITHUB_ENV
+          echo "CXX=/opt/homebrew/opt/llvm@18/bin/clang++-18" >> $GITHUB_ENV
         fi
 
     - uses: actions/checkout@v3
