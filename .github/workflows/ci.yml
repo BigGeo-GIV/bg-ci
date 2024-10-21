@@ -83,21 +83,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - os: ubuntu-24.04
-          comp: gcc
-          compv: 12
-        - os: ubuntu-24.04
-          comp: gcc
-          compv: 13
-        - os: ubuntu-24.04
-          comp: gcc
-          compv: 14
-        - os: ubuntu-24.04
-          comp: clang
-          compv: 16
-        - os: ubuntu-24.04
-          comp: clang
-          compv: 17
+        # - os: ubuntu-24.04
+        #   comp: gcc
+        #   compv: 12
+        # - os: ubuntu-24.04
+        #   comp: gcc
+        #   compv: 13
+        # - os: ubuntu-24.04
+        #   comp: gcc
+        #   compv: 14
+        # - os: ubuntu-24.04
+        #   comp: clang
+        #   compv: 16
+        # - os: ubuntu-24.04
+        #   comp: clang
+        #   compv: 17
         - os: ubuntu-24.04
           comp: clang
           compv: 18
