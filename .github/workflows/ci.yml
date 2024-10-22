@@ -7,22 +7,6 @@ on:
         required: false
         default: false
         type: boolean
-      test_os_matrix:
-        required: false
-        default: "['ubuntu-22.04', 'windows-2022', 'macos-12']"
-        type: string
-      build_docs:
-        required: false
-        default: false
-        type: boolean
-      store_artifacts:
-        required: false
-        default: false
-        type: boolean
-      docker_deploy:
-        required: false
-        default: false
-        type: boolean
       build_python:
         required: false
         default: false
@@ -42,6 +26,9 @@ concurrency:
 jobs:
   lint:
     runs-on: ubuntu-22.04
+    outputs:
+      incs:  ${{ steps.matrix.outputs.incs }}
+      comps: ${{ steps.matrix.outputs.comps }}
 
     steps:
     - uses: actions/checkout@v3
@@ -50,6 +37,21 @@ jobs:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.head_ref }}
         submodules: recursive
+
+    - id: matrix
+      run: |
+        if [[ ('${{ github.ref }}' == 'refs/heads/main' || '${{ github.ref }}' == 'refs/heads/develop') \
+            && '${{ github.event_name }}' == 'push' ]]; then
+          comps='[["gcc", 12], ["gcc", 13], ["gcc", 14], ["clang", 16], ["clang", 17], ["clang", 18]]'
+          incs='[{"os": "macos-13"}, {"os": "macos-14"}, {"os": "windows-2022"}]'
+          echo "comps=${comps}" >> "$GITHUB_OUTPUT"
+          echo "incs=${incs}" >> "$GITHUB_OUTPUT"
+        else
+          comps='[["gcc", 13], ["clang", 18]]'
+          incs='[{"os": "macos-13"}, {"os": "windows-2022"}]'
+          echo "comps=${comps}" >> "$GITHUB_OUTPUT"
+          echo "incs=${incs}" >> "$GITHUB_OUTPUT"
+        fi
 
     - uses: actions/setup-python@v4
       with: { python-version: "3.10" }
@@ -75,116 +77,16 @@ jobs:
           echo "No changes were detected."
         fi
 
-
-  coverage:
-    # Run coverage only when lint succeed
-    needs: [lint]
-    runs-on: ubuntu-22.04
-
-    env: {CONAN_REVISIONS_ENABLED: 1}
-
-    steps:
-    - uses: actions/checkout@v3
-      with: { submodules: recursive }
-
-    - name: Install LCov
-      run: |
-        sudo apt-get update -q
-        sudo apt-get install lcov -q -y
-
-    - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.10" }
-
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: false
-
-    - name: Install python dependencies
-      run: poetry update --no-interaction
-
-    - name: Install gcc-12
-      run: |
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
-        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
-
-    - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
-      with:
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-
-    - name: Configure
-      run: invoke config --no-ninja --preset ci-coverage
-
-    - name: Build
-      run: invoke build --preset ci-coverage
-
-    - name: Process coverage info
-      run: cmake --build build/coverage -t coverage
-
-    - name: Submit to codecov.io
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: build/coverage/coverage.info
-        fail_ci_if_error: false
-        verbose: true # optional (default = false)
-
-  # sanitize:
-  #   needs: [lint]
-  #   runs-on: ubuntu-22.04
-
-  #   env: {CONAN_REVISIONS_ENABLED: 1}
-
-  #   steps:
-  #   - uses: actions/checkout@v3
-  #     with: { submodules: recursive }
-
-  #   - name: Install Python
-  #     uses: actions/setup-python@v4
-  #     with: { python-version: "3.8" }
-
-  #   - name: Dependencies
-  #     uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
-  #     with:
-  #       JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-  #       JF_CONAN_URL: ${{ secrets.JF_CONAN_URL }}
-
-  #   - name: Install clang 15
-  #     run: |
-  #       curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
-  #       chmod +x /opt/llvm.sh
-  #       sudo /opt/llvm.sh 15
-
-  #   - name: Configure
-  #     env: { CC: clang, CXX: clang++-15 }
-  #     run: cmake --preset=ci-sanitize
-
-  #   - name: Build
-  #     run: cmake --build build/sanitize -j 2
-
-  #   - name: Test
-  #     working-directory: build/sanitize
-  #     env:
-  #       ASAN_OPTIONS: "strict_string_checks=1:\
-  #         detect_stack_use_after_return=1:\
-  #         check_initialization_order=1:\
-  #         strict_init_order=1:\
-  #         detect_leaks=1"
-  #       UBSAN_OPTIONS: print_stacktrace=1
-  #     run: ctest --output-on-failure -j 2
-
   build-and-test:
     # Run build-and-test only when lint succeed
     needs: [lint]
-    env: {CONAN_REVISIONS_ENABLED: 1}
 
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(inputs.test_os_matrix) }}
+        os: [ubuntu-24.04]
+        comp: ${{ fromJson(needs.lint.outputs.comps) }}
+        include: ${{ fromJson(needs.lint.outputs.incs) }}
 
     runs-on: ${{ matrix.os }}
 
@@ -193,6 +95,23 @@ jobs:
         shell: bash
 
     steps:
+    - name: Install llvm clang
+      if: runner.os == 'macOS'
+      run: brew install llvm@18
+
+    - name: Set ENV
+      run: |
+        if [ ${{ matrix.comp[0] }} = gcc ]; then
+          echo "CC=gcc-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+        elif [ ${{ matrix.comp[0] }} = clang ]; then
+          echo "CC=clang-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+        elif [ ${{ runner.os }} = macOS ]; then
+          echo "CC=$(brew --prefix llvm@18)/bin/clang" >> $GITHUB_ENV
+          echo "CXX=$(brew --prefix llvm@18)/bin/clang++" >> $GITHUB_ENV
+        fi
+
     - uses: actions/checkout@v3
       with: { submodules: recursive }
 
@@ -208,26 +127,12 @@ jobs:
     - name: Install python dependencies
       run: poetry update --no-interaction
 
-    - name: Install clang and gcc
-      if: matrix.os == 'ubuntu-22.04'
-      run: |
-        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
-        chmod +x /opt/llvm.sh
-        sudo /opt/llvm.sh 16
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
-        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
-
-    - name: Install llvm clang
-      if: matrix.os == 'macos-12'
-      run: |
-        brew install llvm@16
-        /usr/local/opt/llvm@16/bin/clang++ --version
-
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
-      with:
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
+      run: |
+        invoke setup
+        conan remote login -p ${{ secrets.JF_ACCESS_TOKEN }} bg-conan github_workflow
+        invoke deps --buildtype Release
+        conan upload "*" -r bg-conan -c
 
     - name: Upload to conan
       shell: bash
@@ -235,10 +140,6 @@ jobs:
         && github.event_name == 'push'
         && inputs.conan_create
       run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
         export CONAN_DEV_PACKAGE=1
         if [ ${{ github.ref }} = refs/heads/main ]; then
           export CONAN_DEV_PACKAGE=0
@@ -251,12 +152,7 @@ jobs:
 
     - name: Configure
       shell: bash
-      env: { CC: clang-16, CXX: clang++-16 }
       run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         invoke config --no-ninja --preset "ci-${os}"
 
@@ -266,38 +162,26 @@ jobs:
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         invoke build --preset ci-${os}
 
-    - name: Install
-      run: cmake --install build --config Release --prefix prefix
-
     - name: Precheckin Test
-      if: matrix.os == 'ubuntu-22.04' && github.event_name == 'pull_request'
+      if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18' && github.event_name == 'pull_request'
       run: invoke test
 
     - name: Extended Test
-      if: matrix.os == 'ubuntu-22.04'
+      if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
           && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
           && github.event_name == 'push'
       run: invoke test --extended
-
-    - name: Upload artifacts
-      if: inputs.store_artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ matrix.os }}-executable
-        path: build/
 
   build-python:
     # Run build python only when lint succeed
     needs: [lint]
 
-    env: {CONAN_REVISIONS_ENABLED: 1}
-
-    if: inputs.build_python
-
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(inputs.test_os_matrix) }}
+        os: [ubuntu-24.04]
+        comp: [["clang", 18]]
+        include: ${{ fromJson(needs.lint.outputs.incs) }}
 
     runs-on: ${{ matrix.os }}
 
@@ -306,6 +190,23 @@ jobs:
         shell: bash
 
     steps:
+    - name: Install llvm clang
+      if: runner.os == 'macOS'
+      run: brew install llvm@18
+
+    - name: Set ENV
+      run: |
+        if [ ${{ matrix.comp[0] }} = gcc ]; then
+          echo "CC=gcc-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+          echo "CXX=g++-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+        elif [ ${{ matrix.comp[0] }} = clang ]; then
+          echo "CC=clang-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+          echo "CXX=clang++-${{ matrix.comp[1] }}" >> $GITHUB_ENV
+        elif [ ${{ runner.os }} = macOS ]; then
+          echo "CC=$(brew --prefix llvm@18)/bin/clang" >> $GITHUB_ENV
+          echo "CXX=$(brew --prefix llvm@18)/bin/clang++" >> $GITHUB_ENV
+        fi
+
     - uses: actions/checkout@v3
       with: { submodules: recursive }
 
@@ -321,68 +222,13 @@ jobs:
     - name: Install python dependencies
       run: poetry update --no-interaction
 
-    - name: Install clang and gcc
-      if: matrix.os == 'ubuntu-22.04'
-      run: |
-        curl https://apt.llvm.org/llvm.sh --output /opt/llvm.sh
-        chmod +x /opt/llvm.sh
-        sudo /opt/llvm.sh 16
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 50
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 50
-        sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
-
-    - name: Install llvm clang
-      if: matrix.os == 'macos-12'
-      run: |
-        brew install llvm@16
-        /usr/local/opt/llvm@16/bin/clang++ --version
-
     - name: Dependencies
-      uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@pyinvoke
-      with:
-        JF_ACCESS_TOKEN: ${{ secrets.JF_ACCESS_TOKEN }}
-        PYTHON_DEPS: true
+      run: |
+        invoke setup
+        conan remote login -p ${{ secrets.JF_ACCESS_TOKEN }} bg-conan github_workflow
+        invoke deps --buildtype Release
 
     - name: Build Python
-      env: { CC: clang-16, CXX: clang++-16 }
       run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
-          export CC=/usr/local/opt/llvm@16/bin/clang
-          export CXX=/usr/local/opt/llvm@16/bin/clang++
-        fi
         invoke pyinstall
         invoke pytest
-
-  docs:
-    # Deploy docs only when builds succeed
-    needs: [build-and-test]
-
-    runs-on: ubuntu-22.04
-
-    if: github.ref == 'refs/heads/main'
-      && github.event_name == 'push'
-      && inputs.build_docs
-
-    steps:
-    - uses: actions/checkout@v3
-      with: { submodules: recursive }
-
-    - uses: actions/setup-python@v4
-      with: { python-version: "3.10" }
-
-    - name: Install poxy dependencies
-      run: pip3 install poxy
-
-    - name: Install Doxygen
-      run: |
-        sudo apt-get update -q
-        sudo apt-get install doxygen -q -y
-
-    - name: Build docs
-      run: poxy ./docs/poxy.toml
-
-    - name: Deploy docs
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./html
