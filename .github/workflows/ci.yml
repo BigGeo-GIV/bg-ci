@@ -175,6 +175,7 @@ jobs:
   build-python:
     # Run build python only when lint succeed
     needs: [lint]
+    if: inputs.build_python
 
     strategy:
       fail-fast: false
