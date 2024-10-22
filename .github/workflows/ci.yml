@@ -48,7 +48,7 @@ jobs:
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         else
           comps='[["gcc", 13], ["clang", 18]]'
-          incs='[{"os": "macos-14"}, {"os": "windows-2022"}]'
+          incs='[{"os": "macos-13"}, {"os": "windows-2022"}]'
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         fi
