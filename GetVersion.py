@@ -6,8 +6,8 @@ def strtobool(value: str) -> bool:
 
 dev = strtobool(sys.argv[3])
 if dev:
-    name = sys.argv[2] + "-dev"
+    name = "dev"
 else:
-    name = sys.argv[2]
+    name = "rel"
 
 print(json.load(open(sys.argv[1]))[name])
