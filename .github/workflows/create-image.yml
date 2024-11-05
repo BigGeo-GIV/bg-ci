@@ -8,9 +8,13 @@ on:
         required: true
         type: boolean
       name:
-        description: 'The name used as a key to get the version from the version.json file. Usually the name of the repo.'
         required: true
         type: string
+      sfName:
+        description: 'Name to use for sf.'
+        required: false
+        type: string
+        default: ${{ inputs.name }}
 
     secrets:
       GH_ACCESS:
@@ -22,7 +26,7 @@ on:
 
 jobs:
   build-image:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -31,7 +35,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: main
+        ref: v3.x
         path: bg-ci
         token: ${{ secrets.GH_ACCESS }}
 
@@ -44,7 +48,7 @@ jobs:
         else
           stageOrLatest=latest
         fi
-        ver=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} ${{ inputs.dev_version }})
+        ver=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.dev_version }})
         echo "VERSION=${prefix}${ver}" >> "$GITHUB_OUTPUT"
         echo "STAGE_OR_LATEST=${stageOrLatest}" >> "$GITHUB_OUTPUT"
 
@@ -52,7 +56,7 @@ jobs:
       uses: docker/setup-buildx-action@v2
 
     - name: Docker log in
-      uses: BigGeo-GIV/bg-ci/.github/actions/docker-login@main
+      uses: BigGeo-GIV/bg-ci/.github/actions/docker-login@v3.x
       with:
         DOCKER_USER: ${{ secrets.SNOWFLAKE_USERNAME }}
         DOCKER_PASS: ${{ secrets.SNOWFLAKE_PASSWORD_CA_CENTRAL }}
@@ -68,8 +72,8 @@ jobs:
         push: true
         context: ./
         tags: |
-          crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.VERSION }}
-          crbgsearchdevwestus001.azurecr.io/bg-search:${{ steps.version.outputs.STAGE_OR_LATEST }}
+          crbgsearchdevwestus001.azurecr.io/${{ inputs.name }}:${{ steps.version.outputs.VERSION }}
+          crbgsearchdevwestus001.azurecr.io/${{ inputs.name }}:${{ steps.version.outputs.STAGE_OR_LATEST }}
         build-args: |
           CONAN_USER=github_workflow
           CONAN_PSWD=${{ secrets.JF_ACCESS_TOKEN }}
@@ -80,10 +84,8 @@ jobs:
         push: true
         context: ./
         tags: |
-          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.VERSION }}
-          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
-          eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.VERSION }}
-          eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/bg_server:${{ steps.version.outputs.STAGE_OR_LATEST }}
+          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/${{ inputs.sfName }}:${{ steps.version.outputs.VERSION }}
+          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/${{ inputs.sfName }}:${{ steps.version.outputs.STAGE_OR_LATEST }}
         build-args: |
           CONAN_USER=github_workflow
           CONAN_PSWD=${{ secrets.JF_ACCESS_TOKEN }}
