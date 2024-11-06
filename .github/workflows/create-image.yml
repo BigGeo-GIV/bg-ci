@@ -10,11 +10,6 @@ on:
       name:
         required: true
         type: string
-      sfName:
-        description: 'Name to use for sf.'
-        required: false
-        type: string
-        default: ${{ inputs.name }}
 
     secrets:
       GH_ACCESS:
@@ -84,8 +79,8 @@ jobs:
         push: true
         context: ./
         tags: |
-          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/${{ inputs.sfName }}:${{ steps.version.outputs.VERSION }}
-          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/${{ inputs.sfName }}:${{ steps.version.outputs.STAGE_OR_LATEST }}
+          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/${{ inputs.name }}:${{ steps.version.outputs.VERSION }}
+          eqcqgux-biggeoawsoregon.registry.snowflakecomputing.com/spdemo/data_schema/alcyone_repository/${{ inputs.name }}:${{ steps.version.outputs.STAGE_OR_LATEST }}
         build-args: |
           CONAN_USER=github_workflow
           CONAN_PSWD=${{ secrets.JF_ACCESS_TOKEN }}
