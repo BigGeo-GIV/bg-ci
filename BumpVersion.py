@@ -25,7 +25,7 @@ def commitTxtToIdxKey(commitText, allowMajor, alwaysBump):
         idx = 1 if alwaysBump else None # bump minor if commit didn't match a pattern just to be safe
 
     scope = "default"
-    if "(" in cType and ")" in cType:
+    if "(" in cType and ")" in cType and "#" not in cType:
         scope = cType.split("(")[1][0:-1].lower()
 
     return (scope, idx)
@@ -59,7 +59,7 @@ def bumpSemVerStr(semVerStr, idx):
     return ".".join(list(map(str, semVer)))
 
 def performBumps(bumps, verJson, dev):
-    baseName = "dev" if dev else "v"
+    baseName = "dev" if dev else "rel"
 
     first = True
     for (scope, idx) in bumps.items():
