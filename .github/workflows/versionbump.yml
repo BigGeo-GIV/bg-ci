@@ -42,11 +42,13 @@ jobs:
           file=prevMsgs.json
           dev=false
           messageSuffix=""
+          echo "Dispatched"
         else
           git log -1 --pretty=%B > prevMsg.txt
           file=prevMsg.txt
           dev=true
           messageSuffix=" - $(cat prevMsg.txt)"
+          echo "Other trigger"
         fi
 
         bumps=$(python3 bg-ci/BumpVersion.py version.json ${file} ${dev})
