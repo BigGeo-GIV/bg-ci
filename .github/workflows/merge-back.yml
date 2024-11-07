@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v3
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: main
+        ref: v3.x
         path: bg-ci
         token: ${{ secrets.GH_ACCESS }}
 
@@ -38,7 +38,7 @@ jobs:
           suffix=-${suffix}
         fi
 
-        newVer=$(python3 bg-ci/GetVersion.py version.json ${{ inputs.name }} false)
+        newVer=$(python3 bg-ci/GetVersion.py version.json false)
         git checkout -b merge-back${suffix}
         git push -u origin merge-back${suffix} --force
         gh pr create -B develop${suffix} -t "v${newVer} merge back to develop" -b ""
