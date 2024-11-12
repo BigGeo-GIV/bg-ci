@@ -41,10 +41,10 @@ with open(file_path, "r") as file:
             "OTEL_TRACING: <enable_tracing>", "OTEL_TRACING: true")
 
     elif branch == 'refs/heads/SP':
-        content = content.replace("<env-tag>", "snp")
+        content = content.replace("<env-tag>", "latest")
         content = content.replace("IS_SNP: false", "IS_SNP: true")
         content = content.replace(
-            "<image_src_w_prefix>", f"/bg_dev/data_schema_stage/bg_dev/")
+            "<image_src_w_prefix>", f"/spdemo/data_schema/alcyone_repository/")
         content = content.replace("<openTelemetry_logging>",
                                   '''- name: jaeger\r\n      image: /spdemo/data_schema/alcyone_repository/jaegertracing-all-in-one:1.58\r\n      env:\r\n        COLLECTOR_ZIPKIN_HOST_PORT: 9411\r\n        QUERY_BASE_PATH: /jaeger''')
         content = content.replace(
