@@ -41,7 +41,7 @@ with open(file_path, "r") as file:
             "OTEL_TRACING: <enable_tracing>", "OTEL_TRACING: true")
 
     elif branch == 'refs/heads/SP':
-        content = content.replace("<env-tag>", "latest")
+        content = content.replace("<env-tag>", "snp")
         content = content.replace("IS_SNP: false", "IS_SNP: true")
         content = content.replace(
             "<image_src_w_prefix>", f"/spdemo/data_schema/alcyone_repository/")
