@@ -26,12 +26,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Log in to registry
-      uses: docker/login-action@v3
-      with:
-        registry: https://eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/
-        username: ${{ inputs.DOCKER_USER}}
-        password: ${{ inputs.DOCKER_PASS}}
+    # - name: Log in to registry
+    #   uses: docker/login-action@v3
+    #   with:
+    #     registry: https://eqcqgux-biggeoaws.registry.snowflakecomputing.com/alcyone_db/data_schema/alcyone_repository/
+    #     username: ${{ inputs.DOCKER_USER}}
+    #     password: ${{ inputs.DOCKER_PASS}}
 
     - name: Log in to registry
       uses: docker/login-action@v3
