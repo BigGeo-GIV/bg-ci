@@ -1,12 +1,12 @@
 name: "Docker login"
 description: "Authenticate with docker regeistries"
 inputs:
-  DOCKER_USER:
-    description: Docker username
-    required: true
-  DOCKER_PASS:
-    description: Docker password
-    required: true
+  # DOCKER_USER:
+  #   description: Docker username
+  #   required: true
+  # DOCKER_PASS:
+  #   description: Docker password
+  #   required: true
   DOCKER_USER_OREGON:
     description: Docker username
     required: true
