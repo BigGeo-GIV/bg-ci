@@ -237,7 +237,7 @@ jobs:
   on-failure:
     runs-on: ubuntu-24.04
     needs: [build-and-test, build-python]
-    if: ${{ failure() }}
+    if: failure() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     steps:
     - uses: actions/checkout@v2
     - name: Send custom event details to a Slack workflow
