@@ -235,19 +235,9 @@ jobs:
         invoke pytest
 
   on-failure:
-    runs-on: ubuntu-latest
-    if: always() &&
-        (
-          needs.build-and-test.result == 'failure' ||
-          needs.build-and-test.result == 'timed_out'||
-          needs.build-python.result == 'failure'||
-          needs.build-python.result == 'timed_out'
-        )
-        &&
-        (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-    needs:
-      - build-and-test
-      - build-python
+    runs-on: ubuntu-24.04
+    needs: [build-and-test, build-python]
+    if: ${{ failure() }}
     steps:
     - uses: actions/checkout@v2
     - name: Send custom event details to a Slack workflow
