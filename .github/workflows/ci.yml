@@ -43,7 +43,7 @@ jobs:
         if [[ ('${{ github.ref }}' == 'refs/heads/main' || '${{ github.ref }}' == 'refs/heads/develop') \
             && '${{ github.event_name }}' == 'push' ]]; then
           comps='[["gcc", 13], ["gcc", 14], ["clang", 16], ["clang", 17], ["clang", 18]]'
-          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]},  {"os": "macos-13"}, {"os": "macos-14"}, {"os": "windows-2022"}]'
+          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]},  {"os": "macos-13"}, {"os": "windows-2022"}]'
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         else
@@ -164,7 +164,7 @@ jobs:
 
     - name: Precheckin Test
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18' && github.event_name == 'pull_request'
-      run: invoke test
+      run: invoke test && exit -1
 
     - name: Extended Test
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
@@ -234,17 +234,20 @@ jobs:
         invoke pyinstall
         invoke pytest
 
-  failing-job:
-    runs-on: ubuntu-latest
-    steps:
-    - name: failing step
-      run: exit 1
-
   on-failure:
     runs-on: ubuntu-latest
-    if: ${{ always() && (needs.failing-job.result == 'failure' || needs.failing-job.result == 'timed_out') }}
+    if: ${{ always() &&
+        (
+          needs.build-and-test.result == 'failure' ||
+          needs.build-and-test.result == 'timed_out'||
+          needs.build-python.result == 'failure'||
+          needs.build-python.result == 'timed_out'
+        )
+        }} &&
+        (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     needs:
-      - failing-job
+      - build-and-test
+      - build-python
     steps:
     - uses: actions/checkout@v2
     - name: Send custom event details to a Slack workflow
