@@ -164,7 +164,7 @@ jobs:
 
     - name: Precheckin Test
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18' && github.event_name == 'pull_request'
-      run: invoke test && exit -1
+      run: invoke test
 
     - name: Extended Test
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
