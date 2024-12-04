@@ -41,6 +41,8 @@ jobs:
         run: |
           SNOWSQL_USER=$(echo -n "${{ secrets.SNOWSQL_USER }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
           SNOWSQL_PWD=$(echo -n "${{ secrets.SNOWSQL_PWD }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
+          echo "::add-mask::$GITHUBCI_SF_USERNAME"
+          echo "::add-mask::$GITHUBCI_SF_PASSWORD"
           echo "SNOWSQL_USER=$SNOWSQL_USER" >> $GITHUB_ENV
           echo "SNOWSQL_PWD=$SNOWSQL_PWD" >> $GITHUB_ENV
       - uses: actions/checkout@v3
