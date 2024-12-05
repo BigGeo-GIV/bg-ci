@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SNOWSQL_DEST: ~/snowflake
-      SNOWSQL_ACCOUNT: ${{secrets.SNOWSQL_ACCOUNT}}
+      # SNOWSQL_ACCOUNT: ${{secrets.SNOWSQL_ACCOUNT}}
       # SNOWSQL_USER: ${{secrets.SNOWSQL_USER}}
       # SNOWSQL_PWD: ${{secrets.SNOWSQL_PWD}}
       
@@ -43,10 +43,13 @@ jobs:
         run: |
           SNOWSQL_USER=$(echo -n "${{ secrets.SNOWSQL_USER }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
           SNOWSQL_PWD=$(echo -n "${{ secrets.SNOWSQL_PWD }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
+          SNOWSQL_ACCOUNT=$(echo -n "${{ secrets.SNOWSQL_ACCOUNT }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
           echo "::add-mask::$SNOWSQL_USER"
           echo "::add-mask::$SNOWSQL_PWD"
+          echo "::add-mask::$SNOWSQL_ACCOUNT"
           echo "SNOWSQL_USER=$SNOWSQL_USER" >> $GITHUB_ENV
           echo "SNOWSQL_PWD=$SNOWSQL_PWD" >> $GITHUB_ENV
+          echo "SNOWSQL_PWD=$SNOWSQL_ACCOUNT" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           repository: BigGeo-GIV/bg-ci
