@@ -49,7 +49,7 @@ jobs:
           echo "::add-mask::$SNOWSQL_ACCOUNT"
           echo "SNOWSQL_USER=$SNOWSQL_USER" >> $GITHUB_ENV
           echo "SNOWSQL_PWD=$SNOWSQL_PWD" >> $GITHUB_ENV
-          echo "SNOWSQL_PWD=$SNOWSQL_ACCOUNT" >> $GITHUB_ENV
+          echo "SNOWSQL_ACCOUNT=$SNOWSQL_ACCOUNT" >> $GITHUB_ENV
       - uses: actions/checkout@v3
         with:
           repository: BigGeo-GIV/bg-ci
