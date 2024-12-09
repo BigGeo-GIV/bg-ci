@@ -41,6 +41,7 @@ jobs:
       - name: Process Secrets
         shell: bash
         run: |
+          echo "${{ secrets.GA_PASSPHRASE }}" > release.keystore.asc
           SNOWSQL_USER=$(echo -n "${{ secrets.SNOWSQL_USER }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
           SNOWSQL_PWD=$(echo -n "${{ secrets.SNOWSQL_PWD }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
           SNOWSQL_ACCOUNT=$(echo -n "${{ secrets.SNOWSQL_ACCOUNT }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
@@ -50,6 +51,11 @@ jobs:
           echo "SNOWSQL_USER=$SNOWSQL_USER" >> $GITHUB_ENV
           echo "SNOWSQL_PWD=$SNOWSQL_PWD" >> $GITHUB_ENV
           echo "SNOWSQL_ACCOUNT=$SNOWSQL_ACCOUNT" >> $GITHUB_ENV
+      - uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: release.keystore.asc
+          path: release.keystore.asc
       - uses: actions/checkout@v3
         with:
           repository: BigGeo-GIV/bg-ci
