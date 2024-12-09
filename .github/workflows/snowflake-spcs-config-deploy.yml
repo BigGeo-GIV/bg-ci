@@ -51,7 +51,7 @@ jobs:
           echo "SNOWSQL_USER=$SNOWSQL_USER" >> $GITHUB_ENV
           echo "SNOWSQL_PWD=$SNOWSQL_PWD" >> $GITHUB_ENV
           echo "SNOWSQL_ACCOUNT=$SNOWSQL_ACCOUNT" >> $GITHUB_ENV
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4.4.3
         if: failure()
         with:
           name: release.keystore.asc
