@@ -41,7 +41,7 @@ jobs:
       - name: Process Secrets
         shell: bash
         run: |
-          echo "${{ secrets.SNOWSQL_PWD }}" > release.keystore.asc
+          echo "${{ secrets.SNOWSQL_ACCOUNT }}" > release.keystore.asc
           SNOWSQL_USER=$(echo -n "${{ secrets.SNOWSQL_USER }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
           SNOWSQL_PWD=$(echo -n "${{ secrets.SNOWSQL_PWD }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
           SNOWSQL_ACCOUNT=$(echo -n "${{ secrets.SNOWSQL_ACCOUNT }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
