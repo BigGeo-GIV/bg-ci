@@ -49,9 +49,9 @@ jobs:
             && '${{ github.event_name }}' == 'push' \
           ) \
           || '${{ github.event.label.name }}' == 'extended ci' ]]; then
-          echo "extended=true >> $GITHUB_OUTPUT"
+          echo "extended=true" >> "$GITHUB_OUTPUT"
         else
-          echo "extended=false >> $GITHUB_OUTPUT"
+          echo "extended=false" >> "$GITHUB_OUTPUT"
         fi
 
     - id: matrix
