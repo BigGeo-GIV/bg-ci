@@ -56,7 +56,7 @@ jobs:
 
     - id: matrix
       run: |
-        if [[ ${{ steps.which.extended }} ]]; then
+        if [[ ${{ steps.which.outputs.extended }} ]]; then
           comps='[["gcc", 13], ["gcc", 14], ["clang", 16], ["clang", 17], ["clang", 18]]'
           incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]},  {"os": "macos-13"}, {"os": "windows-2022"}]'
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
