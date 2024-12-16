@@ -39,6 +39,7 @@ jobs:
         ref: ${{ github.head_ref }}
         submodules: recursive
 
+    - uses: snnaplab/get-labels-action@v1
     - id: which
       run: |
         if [[ \
@@ -48,7 +49,7 @@ jobs:
             ) \
             && '${{ github.event_name }}' == 'push' \
           ) \
-          || '${{ github.event.label.name }}' == 'extended ci' ]]; then
+          || ${{ contains(fromJSON(env.LABELS), 'extended ci') }} ]]; then
           echo "extended=true" >> "$GITHUB_OUTPUT"
         else
           echo "extended=false" >> "$GITHUB_OUTPUT"
