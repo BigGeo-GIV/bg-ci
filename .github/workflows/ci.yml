@@ -49,7 +49,7 @@ jobs:
             ) \
             && '${{ github.event_name }}' == 'push' \
           ) \
-          || ${{ contains(fromJSON(env.LABELS), 'extended ci') }} ]]; then
+          || '${{ contains(fromJSON(env.LABELS), 'extended ci') }}' == 'true' ]]; then
           echo "extended=true" >> "$GITHUB_OUTPUT"
         else
           echo "extended=false" >> "$GITHUB_OUTPUT"
@@ -57,7 +57,7 @@ jobs:
 
     - id: matrix
       run: |
-        if [[ ${{ steps.which.outputs.extended }} == 'true' ]]; then
+        if [[ '${{ steps.which.outputs.extended }}' == 'true' ]]; then
           comps='[["gcc", 13], ["gcc", 14], ["clang", 16], ["clang", 17], ["clang", 18]]'
           incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]},  {"os": "macos-13"}, {"os": "windows-2022"}]'
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
@@ -181,7 +181,7 @@ jobs:
     - name: Tests
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
       run:
-        if [[ ${{ needs.lint.outputs.extended }} ]]; then
+        if [[ '${{ needs.lint.outputs.extended }}' == 'true' ]]; then
           invoke test --extended
         else
           invoke test
