@@ -29,6 +29,7 @@ jobs:
     outputs:
       incs:  ${{ steps.matrix.outputs.incs }}
       comps: ${{ steps.matrix.outputs.comps }}
+      extended: ${{ steps.which.outputs.extended }}
 
     steps:
     - uses: actions/checkout@v3
@@ -38,10 +39,24 @@ jobs:
         ref: ${{ github.head_ref }}
         submodules: recursive
 
+    - id: which
+      run: |
+        if [[ \
+          ( \
+            ('${{ github.ref }}' == 'refs/heads/main' \
+              || '${{ github.ref }}' == 'refs/heads/develop' \
+            ) \
+            && '${{ github.event_name }}' == 'push' \
+          ) \
+          || ${{ github.event.label.name }} == 'extended ci' ]]; then
+          echo "extended=true >> $GITHUB_OUTPUT"
+        else
+          echo "extended=false >> $GITHUB_OUTPUT"
+        fi
+
     - id: matrix
       run: |
-        if [[ ('${{ github.ref }}' == 'refs/heads/main' || '${{ github.ref }}' == 'refs/heads/develop') \
-            && '${{ github.event_name }}' == 'push' ]]; then
+        if [[ ${{ steps.which.extended }} ]]; then
           comps='[["gcc", 13], ["gcc", 14], ["clang", 16], ["clang", 17], ["clang", 18]]'
           incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]},  {"os": "macos-13"}, {"os": "windows-2022"}]'
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
@@ -162,15 +177,14 @@ jobs:
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         invoke build --preset ci-${os}
 
-    - name: Precheckin Test
-      if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18' && github.event_name == 'pull_request'
-      run: invoke test
-
-    - name: Extended Test
+    - name: Tests
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
-          && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-          && github.event_name == 'push'
-      run: invoke test --extended
+      run:
+        if [[ ${{ needs.lint.outputs.extended }} ]]; then
+          invoke test --extended
+        else
+          invoke test
+        fi
 
   build-python:
     # Run build python only when lint succeed
