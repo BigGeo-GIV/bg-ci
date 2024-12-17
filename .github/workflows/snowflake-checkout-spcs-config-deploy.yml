@@ -1,0 +1,144 @@
+# This is a basic workflow to help you get started with Actions
+
+name: SnowSQL NA SPCS Deploy
+
+on:
+
+  workflow_call:
+    inputs:
+      BG_VERSION:
+        required: true
+        type: string
+    secrets:
+      SAS_TOKEN:
+        required: true
+      SNOWSQL_ACCOUNT:
+        required: true
+      SNOWSQL_USER:
+        required: true
+      SNOWSQL_PWD:
+        required: true
+      GH_ACCESS:
+        required: true
+      GA_PASSPHRASE:
+        required: true
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  upload-to-EQCQGUX-BIGGEOAWSOREGON:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+    env:
+      SNOWSQL_DEST: ~/snowflake
+      # SNOWSQL_ACCOUNT: ${{secrets.SNOWSQL_ACCOUNT}}
+      # SNOWSQL_USER: ${{secrets.SNOWSQL_USER}}
+      # SNOWSQL_PWD: ${{secrets.SNOWSQL_PWD}}
+      
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+      - name: Process Secrets
+        shell: bash
+        run: |
+          SNOWSQL_USER=$(echo -n "${{ secrets.SNOWSQL_USER }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
+          SNOWSQL_PWD=$(echo -n "${{ secrets.SNOWSQL_PWD }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
+          SNOWSQL_ACCOUNT=$(echo -n "${{ secrets.SNOWSQL_ACCOUNT }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
+          SAS_TOKEN=$(echo -n "${{ secrets.SAS_TOKEN }}" | base64 -d | gpg --decrypt --quiet --batch --passphrase "${{ secrets.GA_PASSPHRASE }}")
+          echo "::add-mask::$SNOWSQL_USER"
+          echo "::add-mask::$SNOWSQL_PWD"
+          echo "::add-mask::$SNOWSQL_ACCOUNT"
+          echo "::add-mask::$SAS_TOKEN"
+          echo "SNOWSQL_USER=$SNOWSQL_USER" >> $GITHUB_ENV
+          echo "SNOWSQL_PWD=$SNOWSQL_PWD" >> $GITHUB_ENV
+          echo "SNOWSQL_ACCOUNT=$SNOWSQL_ACCOUNT" >> $GITHUB_ENV
+          echo "SAS_TOKEN=$SAS_TOKEN" >> $GITHUB_ENV
+      - uses: actions/checkout@v3
+        with:
+          repository: BigGeo-GIV/bg-ci
+          ref: main
+          path: bg-ci
+          token: ${{ secrets.GH_ACCESS }}
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "branch=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      - name: Install Python 3.10
+        uses: actions/setup-python@v5
+        with: 
+          python-version: '3.10'
+
+      # Runs a single command using the runners shell
+      - name: Download SnowSQL
+        run: curl -O https://sfc-repo.snowflakecomputing.com/snowsql/bootstrap/1.2/linux_x86_64/snowsql-1.2.31-linux_x86_64.bash
+
+      # Runs a set of commands using the runners shell
+      - name: Install SnowSQL
+        run: SNOWSQL_DEST=~/snowflake SNOWSQL_LOGIN_SHELL=~/.profile bash snowsql-1.2.31-linux_x86_64.bash
+
+
+      - name: Inject version and tag into biggeo-c.yaml
+        run: |
+          python3 bg-ci/inject_version_spcs.py biggeo-c.yaml ${{ inputs.BG_VERSION }} ${{ github.ref }} "${{ env.SAS_TOKEN }}"
+          python3 bg-ci/inject_version_spcs.py manifest.yml ${{ inputs.BG_VERSION }} ${{ github.ref }}
+          python3 bg-ci/inject_resource_limit_spcs.py biggeo-c.yaml
+          ls
+          touch files_to_upload.sql
+
+      - name: Upload Files to SPCS Stage
+        if: github.ref == 'refs/heads/stage'
+        run: |
+          for f in $(cat files_to_upload.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          for f in $(cat files_to_upload_streamlit.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES/streamlit AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          ~/snowflake/snowsql -d BG_DEV -s DATA_SCHEMA -f files_to_upload.sql
+
+      - name: Upload Files to SPCS S&P Stage
+        if: github.ref == 'refs/heads/SP'
+        run: |
+          for f in $(cat files_to_upload.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_SP AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          for f in $(cat files_to_upload_streamlit.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_SP/streamlit AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          ~/snowflake/snowsql -d BG_DEV -s DATA_SCHEMA -f files_to_upload.sql
+
+      - name: Upload Files to SPCS S&P 2.0 Stage
+        if: github.ref == 'refs/heads/SP2'
+        run: |
+          for f in $(cat files_to_upload.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_SP2 AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          for f in $(cat files_to_upload_streamlit.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_SP2/streamlit AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          ~/snowflake/snowsql -d BG_DEV -s DATA_SCHEMA -f files_to_upload.sql
+
+      - name: Upload Files to RELEASE Stage
+        if: github.ref == 'refs/heads/main'
+        run: |
+          for f in $(cat files_to_upload.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_RELEASE AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          for f in $(cat files_to_upload_streamlit.txt); do
+            echo "PUT file://${f} @BG_DEV.DATA_SCHEMA.NA_SPCS_FILES_RELEASE/streamlit AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          ~/snowflake/snowsql -d BG_DEV -s DATA_SCHEMA -f files_to_upload.sql
+
+      - name: Upload Files to Dev SPCS Stage
+        if: github.ref != 'refs/heads/stage' && github.ref !='refs/heads/main' && github.ref !='refs/heads/SP' && github.ref !='refs/heads/SP2'
+        run: |
+          for f in $(cat files_to_upload.txt); do
+            echo "PUT file://${f} @BG_DEV.${{steps.extract_branch.outputs.branch}}.NA_SPCS_FILES_${{steps.extract_branch.outputs.branch}} AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          for f in $(cat files_to_upload_streamlit.txt); do
+            echo "PUT file://${f} @BG_DEV.${{steps.extract_branch.outputs.branch}}.NA_SPCS_FILES_${{steps.extract_branch.outputs.branch}}/streamlit AUTO_COMPRESS=FALSE OVERWRITE=TRUE;" >> files_to_upload.sql
+          done
+          cat files_to_upload.sql
+          ~/snowflake/snowsql -d BG_DEV -s ${{steps.extract_branch.outputs.branch}} -f files_to_upload.sql
