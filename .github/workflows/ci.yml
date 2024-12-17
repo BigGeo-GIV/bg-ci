@@ -244,10 +244,9 @@ jobs:
         conan remote login -p ${{ secrets.JF_ACCESS_TOKEN }} bg-conan github_workflow
         invoke deps --buildtype Release
 
-    - name: Build Python
+    - name: Build and test Python
       run: |
-        invoke pyinstall
-        invoke pytest
+        invoke py.install py.test
 
   on-failure:
     runs-on: ubuntu-24.04
