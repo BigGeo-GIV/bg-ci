@@ -39,17 +39,17 @@ jobs:
         ref: ${{ github.head_ref }}
         submodules: recursive
 
-    - uses: snnaplab/get-labels-action@v1
     - id: which
       run: |
-        if [[ \
-          ( \
-            ('${{ github.ref }}' == 'refs/heads/main' \
-              || '${{ github.ref }}' == 'refs/heads/develop' \
-            ) \
-            && '${{ github.event_name }}' == 'push' \
-          ) \
-          || '${{ contains(fromJSON(env.LABELS), 'extended ci') }}' == 'true' ]]; then
+        if [[ '${{ github.event.pull_request.number }}' != '' ]]; then
+          labels=$(gh pr view \
+              ${{ github.event.pull_request.number }} \
+              --json labels -q '.labels|map(.name)')
+        fi
+
+        if { [[ '${{ github.ref }}' == 'refs/heads/main' || '${{ github.ref }}' == 'refs/heads/develop' ]] && \
+              [[ '${{ github.event_name }}' == 'push' ]]; } || \
+              echo ${labels} | grep -q 'extended ci'; then
           echo "extended=true" >> "$GITHUB_OUTPUT"
         else
           echo "extended=false" >> "$GITHUB_OUTPUT"
