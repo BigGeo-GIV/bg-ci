@@ -40,6 +40,10 @@ jobs:
         submodules: recursive
 
     - id: which
+      env:
+        NUMBER:  ${{ github.event.pull_request.number }}
+        GH_REPO: ${{ github.repository }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         if [[ '${{ github.event.pull_request.number }}' != '' ]]; then
           labels=$(gh pr view \
