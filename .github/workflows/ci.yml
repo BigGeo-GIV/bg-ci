@@ -95,6 +95,8 @@ jobs:
 
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
+
+          echo ${incs}
         fi
 
     - uses: actions/setup-python@v4
