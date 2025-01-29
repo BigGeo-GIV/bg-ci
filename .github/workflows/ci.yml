@@ -91,6 +91,7 @@ jobs:
           if [[ '${{inputs.mac}}' == 'true' ]]; then
             incs='${incs}, {"os": "macos-13"}'
           fi
+          incs='${incs} ]'
 
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
