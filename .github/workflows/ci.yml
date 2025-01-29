@@ -73,12 +73,12 @@ jobs:
           comps='[["gcc", 13], ["gcc", 14], ["clang", 17], ["clang", 18]]'
           incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]}'
           if [[ '${{inputs.windows}}' == 'true' ]]; then
-            incs='$incs, {"os": "windows-2022"}'
+            incs="$incs, {\"os\": \"windows-2022\"}"
           fi
           if [[ '${{inputs.mac}}' == 'true' ]]; then
-            incs='$incs, {"os": "macos-13"}'
+            incs="$incs, {\"os\": \"macos-13\"}"
           fi
-          incs='$incs ]'
+          incs="$incs ]"
 
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
@@ -86,12 +86,12 @@ jobs:
           comps='[["clang", 18]]'
           incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]}'
           if [[ '${{inputs.windows}}' == 'true' ]]; then
-            incs='$incs, {"os": "windows-2022"}'
+            incs="$incs, {\"os\": \"windows-2022\"}"
           fi
           if [[ '${{inputs.mac}}' == 'true' ]]; then
-            incs='$incs, {"os": "macos-13"}'
+            incs="$incs, {\"os\": \"macos-13\"}"
           fi
-          incs='$incs ]'
+          incs="$incs ]"
 
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
