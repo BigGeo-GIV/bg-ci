@@ -11,6 +11,14 @@ on:
         required: false
         default: false
         type: boolean
+      no_windows:
+        required: false
+        default: false
+        type: boolean
+      no_mac:
+        required: false
+        default: false
+        type: boolean
     secrets:
       GH_ACCESS:
         required: true
@@ -63,12 +71,27 @@ jobs:
       run: |
         if [[ '${{ steps.which.outputs.extended }}' == 'true' ]]; then
           comps='[["gcc", 13], ["gcc", 14], ["clang", 17], ["clang", 18]]'
-          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]},  {"os": "macos-13"}, {"os": "windows-2022"}]'
+          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]}'
+          if [[ '${{inputs.no_windows}}' == 'false' ]]; then
+            incs='${incs}, {"os": "windows-2022"}'
+          fi
+          if [[ '${{inputs.no_mac}}' == 'false' ]]; then
+            incs='${incs}, {"os": "macos-13"}'
+          fi
+          incs='${incs} ]'
+
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         else
           comps='[["clang", 18]]'
-          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]}, {"os": "macos-13"}, {"os": "windows-2022"}]'
+          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]}'
+          if [[ '${{inputs.no_windows}}' == 'false' ]]; then
+            incs='${incs}, {"os": "windows-2022"}'
+          fi
+          if [[ '${{inputs.no_mac}}' == 'false' ]]; then
+            incs='${incs}, {"os": "macos-13"}'
+          fi
+
           echo "comps=${comps}" >> "$GITHUB_OUTPUT"
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         fi
