@@ -11,13 +11,13 @@ on:
         required: false
         default: false
         type: boolean
-      no_windows:
+      windows:
         required: false
-        default: false
+        default: true
         type: boolean
-      no_mac:
+      mac:
         required: false
-        default: false
+        default: true
         type: boolean
     secrets:
       GH_ACCESS:
@@ -72,10 +72,10 @@ jobs:
         if [[ '${{ steps.which.outputs.extended }}' == 'true' ]]; then
           comps='[["gcc", 13], ["gcc", 14], ["clang", 17], ["clang", 18]]'
           incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]}'
-          if [[ '${{inputs.no_windows}}' == 'false' ]]; then
+          if [[ '${{inputs.windows}}' == 'true' ]]; then
             incs='${incs}, {"os": "windows-2022"}'
           fi
-          if [[ '${{inputs.no_mac}}' == 'false' ]]; then
+          if [[ '${{inputs.mac}}' == 'true' ]]; then
             incs='${incs}, {"os": "macos-13"}'
           fi
           incs='${incs} ]'
@@ -85,10 +85,10 @@ jobs:
         else
           comps='[["clang", 18]]'
           incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 12]}'
-          if [[ '${{inputs.no_windows}}' == 'false' ]]; then
+          if [[ '${{inputs.windows}}' == 'true' ]]; then
             incs='${incs}, {"os": "windows-2022"}'
           fi
-          if [[ '${{inputs.no_mac}}' == 'false' ]]; then
+          if [[ '${{inputs.mac}}' == 'true' ]]; then
             incs='${incs}, {"os": "macos-13"}'
           fi
 
