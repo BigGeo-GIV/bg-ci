@@ -212,9 +212,9 @@ jobs:
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
       run: |
         if [[ '${{ needs.lint.outputs.extended }}' == 'true' ]]; then
-          invoke test --extended
+          invoke test --extended --preset "ci-${os}"
         else
-          invoke test
+          invoke test --preset "ci-${os}"
         fi
 
   build-python:
