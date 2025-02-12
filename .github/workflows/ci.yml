@@ -211,6 +211,7 @@ jobs:
     - name: Tests
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
       run: |
+        osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         if [[ '${{ needs.lint.outputs.extended }}' == 'true' ]]; then
           invoke test --extended --preset "ci-${os}"
         else
