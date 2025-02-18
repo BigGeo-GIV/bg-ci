@@ -24,15 +24,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with: { submodules: recursive }
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: v3.x
+        ref: v4.x
         path: bg-ci
-        token: ${{ secrets.GH_ACCESS }}
 
     - name: Get version
       id: version

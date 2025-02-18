@@ -15,14 +15,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: BigGeo-GIV/bg-ci
         ref: v3.x
         path: bg-ci
-        token: ${{ secrets.GH_ACCESS }}
 
     - name: Install Python
       uses: actions/setup-python@v4

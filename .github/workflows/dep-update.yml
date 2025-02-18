@@ -16,13 +16,12 @@ jobs:
     env: {CONAN_REVISIONS_ENABLED: 1}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GH_ACCESS }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.head_ref }}
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: BigGeo-GIV/bg-ci
         ref: main
@@ -53,7 +52,7 @@ jobs:
       if: steps.bump.outputs.GO
       id: commit
       env:
-        GH_TOKEN: ${{ secrets.GH_ACCESS }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git config --local user.name "github-actions[bot]"
         git config --local user.email "github-actions[bot]@users.noreply.github.com"

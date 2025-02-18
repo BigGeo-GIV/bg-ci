@@ -16,11 +16,9 @@ jobs:
     env: {CONAN_REVISIONS_ENABLED: 1}
 
     steps:
-    - uses: actions/checkout@v3
-      with:
-        token: ${{ secrets.GH_ACCESS }}
+    - uses: actions/checkout@v4
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         repository: BigGeo-GIV/bg-ci
         ref: main
