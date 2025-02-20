@@ -20,7 +20,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         repository: BigGeo-GIV/bg-ci
-        ref: v3.x
+        ref: v4.x
         path: bg-ci
 
     - name: Install Python
