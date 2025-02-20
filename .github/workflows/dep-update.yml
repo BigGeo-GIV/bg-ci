@@ -20,6 +20,7 @@ jobs:
       with:
         repository: ${{ github.event.pull_request.head.repo.full_name }}
         ref: ${{ github.head_ref }}
+        token: ${{ secrets.GH_ACCESS }}
 
     - uses: actions/checkout@v4
       with:
