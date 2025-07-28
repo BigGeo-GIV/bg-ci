@@ -204,8 +204,12 @@ jobs:
     - name: Install llvm clang
       if: matrix.os == 'macos-12'
       run: |
+        echo "Installing LLVM on macOS..."
         brew install llvm@16
+        echo "LLVM installation complete. Checking version:"
         /usr/local/opt/llvm@16/bin/clang++ --version
+        echo "LLVM binaries available:"
+        ls -la /usr/local/opt/llvm@16/bin/clang*
 
     - name: Dependencies
       uses: BigGeo-GIV/bg-ci/.github/actions/conan-dependencies@main
@@ -236,13 +240,23 @@ jobs:
 
     - name: Configure
       shell: bash
-      env: { CC: clang-16, CXX: clang++-16 }
       run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
+        echo "Running on OS: ${{ matrix.os }}"
+        if [ "${{ matrix.os }}" = "macos-12" ]; then
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++
+          echo "macOS: Set CC=$CC, CXX=$CXX"
+        else
+          export CC=clang-16
+          export CXX=clang++-16
+          echo "Linux: Set CC=$CC, CXX=$CXX"
         fi
+        echo "Verifying compilers:"
+        $CC --version || echo "ERROR: CC ($CC) not found"
+        $CXX --version || echo "ERROR: CXX ($CXX) not found"
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
+        echo "Detected OS for preset: $os"
+        echo "Running cmake with preset: ci-${os}"
         cmake "--preset=ci-${os}"
 
     - name: Build
