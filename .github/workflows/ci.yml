@@ -9,7 +9,7 @@ on:
         type: boolean
       test_os_matrix:
         required: false
-        default: "['ubuntu-22.04', 'windows-2022', 'macos-12']"
+        default: "['ubuntu-22.04', 'windows-2022', 'macos-13']"
         type: string
       build_docs:
         required: false
@@ -179,6 +179,21 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+    - name: Debug job start
+      run: |
+        echo "=== JOB STARTED ==="
+        echo "Runner OS: ${{ runner.os }}"
+        echo "Matrix OS: ${{ matrix.os }}"
+        echo "GitHub event: ${{ github.event_name }}"
+        echo "GitHub ref: ${{ github.ref }}"
+        echo "=== ENVIRONMENT ==="
+        env | sort
+        echo "=== SYSTEM INFO ==="
+        uname -a
+        echo "=== WORKING DIRECTORY ==="
+        pwd
+        ls -la
+    
     - uses: actions/checkout@v3
       with: { submodules: recursive }
 
@@ -202,7 +217,7 @@ jobs:
         sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-12 50
 
     - name: Install llvm clang
-      if: matrix.os == 'macos-12'
+      if: matrix.os == 'macos-13'
       run: |
         echo "Installing LLVM on macOS..."
         brew install llvm@16
@@ -224,7 +239,7 @@ jobs:
         && github.event_name == 'push'
         && inputs.conan_create
       run: |
-        if [ ${{ matrix.os }} = macos-12 ]; then
+        if [ ${{ matrix.os }} = macos-13 ]; then
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++
         fi
@@ -242,7 +257,7 @@ jobs:
       shell: bash
       run: |
         echo "Running on OS: ${{ matrix.os }}"
-        if [ "${{ matrix.os }}" = "macos-12" ]; then
+        if [ "${{ matrix.os }}" = "macos-13" ]; then
           export CC=/usr/local/opt/llvm@16/bin/clang
           export CXX=/usr/local/opt/llvm@16/bin/clang++
           echo "macOS: Set CC=$CC, CXX=$CXX"
