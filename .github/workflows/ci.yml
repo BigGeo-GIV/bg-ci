@@ -179,21 +179,6 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - name: Debug job start
-      run: |
-        echo "=== JOB STARTED ==="
-        echo "Runner OS: ${{ runner.os }}"
-        echo "Matrix OS: ${{ matrix.os }}"
-        echo "GitHub event: ${{ github.event_name }}"
-        echo "GitHub ref: ${{ github.ref }}"
-        echo "=== ENVIRONMENT ==="
-        env | sort
-        echo "=== SYSTEM INFO ==="
-        uname -a
-        echo "=== WORKING DIRECTORY ==="
-        pwd
-        ls -la
-    
     - uses: actions/checkout@v3
       with: { submodules: recursive }
 
