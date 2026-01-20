@@ -76,7 +76,7 @@ jobs:
             incs="$incs, {\"os\": \"windows-2022\"}"
           fi
           if [[ '${{inputs.mac}}' == 'true' ]]; then
-            incs="$incs, {\"os\": \"macos-13\"}"
+            incs="$incs, {\"os\": \"macos-15-intel\"}"
           fi
           incs="$incs ]"
 
@@ -89,7 +89,7 @@ jobs:
             incs="$incs, {\"os\": \"windows-2022\"}"
           fi
           if [[ '${{inputs.mac}}' == 'true' ]]; then
-            incs="$incs, {\"os\": \"macos-13\"}"
+            incs="$incs, {\"os\": \"macos-15-intel\"}"
           fi
           incs="$incs ]"
 
