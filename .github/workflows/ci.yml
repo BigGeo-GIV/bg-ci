@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   lint:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       incs:  ${{ steps.matrix.outputs.incs }}
       comps: ${{ steps.matrix.outputs.comps }}
@@ -71,7 +71,7 @@ jobs:
       run: |
         if [[ '${{ steps.which.outputs.extended }}' == 'true' ]]; then
           comps='[["gcc", 13], ["gcc", 14], ["clang", 17], ["clang", 18]]'
-          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 13]}'
+          incs='[ {"os": "ubuntu-24.04", "comp": ["gcc", 13]}'
           if [[ '${{inputs.windows}}' == 'true' ]]; then
             incs="$incs, {\"os\": \"windows-2022\"}"
           fi
@@ -84,7 +84,7 @@ jobs:
           echo "incs=${incs}" >> "$GITHUB_OUTPUT"
         else
           comps='[["clang", 18]]'
-          incs='[ {"os": "ubuntu-22.04", "comp": ["gcc", 13]}'
+          incs='[ {"os": "ubuntu-24.04", "comp": ["gcc", 13]}'
           if [[ '${{inputs.windows}}' == 'true' ]]; then
             incs="$incs, {\"os\": \"windows-2022\"}"
           fi
