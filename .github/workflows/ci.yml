@@ -19,7 +19,7 @@ on:
         required: false
         default: true
         type: boolean
-      cache_duckdb: 
+      cache_duckdb:
         required: false
         default: false
         type: boolean
@@ -209,9 +209,15 @@ jobs:
 
     - uses: actions/cache@v4
       if: inputs.cache_duckdb
-      with:                                                                                             
-        path: build/
-        key: duckdb-build-${{ runner.os }}-${{ matrix.comp[0] }}-${{ matrix.comp[1] }}-${{steps.duckdb-sha.outputs.sha }}
+      with:
+        path: |
+          build/src/
+          build/third_party/
+          build/tools/
+          build/extension/core_functions/
+          build/extension/jemalloc/
+          build/extension/parquet/
+        key: duckdb-build-${{ runner.os }}-${{ matrix.comp[0] }}-${{ matrix.comp[1] }}-${{ steps.duckdb-sha.outputs.sha }}
 
     - name: Configure
       shell: bash
