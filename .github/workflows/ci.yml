@@ -209,6 +209,7 @@ jobs:
 
     - uses: actions/cache@v4
       if: inputs.cache_duckdb
+      id: duckdb-cache
       with:
         path: |
           build/src/
@@ -218,6 +219,10 @@ jobs:
           build/extension/jemalloc/
           build/extension/parquet/
         key: duckdb-build-${{ runner.os }}-${{ matrix.comp[0] }}-${{ matrix.comp[1] }}-${{ steps.duckdb-sha.outputs.sha }}
+
+    - name: Restore cache timestamps
+      if: inputs.cache_duckdb && steps.duckdb-cache.outputs.cache-hit == 'true'
+      run: find build/ -exec touch {} +
 
     - name: Configure
       shell: bash
