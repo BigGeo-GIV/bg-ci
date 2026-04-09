@@ -19,6 +19,10 @@ on:
         required: false
         default: true
         type: boolean
+      cache_duckdb: 
+        required: false
+        default: false
+        type: boolean
     secrets:
       GH_ACCESS:
         required: true
@@ -197,6 +201,17 @@ jobs:
         verAry=($(conan inspect . | grep version | tr ":" "\n")) && ver=${verAry[1]}
         nameVer=$(echo ${name}/${ver})
         conan upload ${nameVer} -r bg-conan -c
+
+    - name: Get DuckDB commit hash
+      id: duckdb-sha
+      if: inputs.cache_duckdb
+      run: echo "sha=$(git -C duckdb rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v4
+      if: inputs.cache_duckdb
+      with:                                                                                             
+        path: build/
+        key: duckdb-build-${{ runner.os }}-${{ matrix.comp[0] }}-${{ matrix.comp[1] }}-${{steps.duckdb-sha.outputs.sha }}
 
     - name: Configure
       shell: bash
