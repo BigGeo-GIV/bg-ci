@@ -19,6 +19,10 @@ on:
         required: false
         default: true
         type: boolean
+      cache_duckdb:
+        required: false
+        default: false
+        type: boolean
     secrets:
       GH_ACCESS:
         required: true
@@ -198,11 +202,34 @@ jobs:
         nameVer=$(echo ${name}/${ver})
         conan upload ${nameVer} -r bg-conan -c
 
+    - name: Get DuckDB commit hash
+      id: duckdb-sha
+      if: inputs.cache_duckdb
+      run: echo "sha=$(git -C duckdb rev-parse HEAD)" >> $GITHUB_OUTPUT
+
+    - uses: actions/cache@v4
+      if: inputs.cache_duckdb
+      id: duckdb-cache
+      with:
+        path: |
+          build/src/
+          build/third_party/
+          build/tools/
+          build/test/
+          build/extension/core_functions/
+          build/extension/jemalloc/
+          build/extension/parquet/
+        key: duckdb-build-${{ runner.os }}-${{ matrix.comp[0] }}-${{ matrix.comp[1] }}-${{ steps.duckdb-sha.outputs.sha }}
+
     - name: Configure
       shell: bash
       run: |
         osAry=($(echo ${{ matrix.os }} | tr "-" "\n")) && os=${osAry[0]}
         invoke config --no-ninja --preset "ci-${os}"
+
+    - name: Restore cache timestamps
+      if: inputs.cache_duckdb && steps.duckdb-cache.outputs.cache-hit == 'true'
+      run: find build/ -exec touch {} +
 
     - name: Build
       shell: bash
