@@ -40,7 +40,7 @@ jobs:
     uses: BigGeo-GIV/bg-ci/.github/workflows/lint.yml@v4.x
     secrets: inherit
 
-  matrix:
+  build-matrix:
     runs-on: ubuntu-24.04
     outputs:
       incs:  ${{ steps.matrix.outputs.incs }}
@@ -102,14 +102,14 @@ jobs:
 
   build-and-test:
     # Run build-and-test only when lint succeed
-    needs: [lint, matrix]
+    needs: [lint, build-matrix]
 
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-24.04]
-        comp: ${{ fromJson(needs.matrix.outputs.comps) }}
-        include: ${{ fromJson(needs.matrix.outputs.incs) }}
+        comp: ${{ fromJson(needs.build-matrix.outputs.comps) }}
+        include: ${{ fromJson(needs.build-matrix.outputs.incs) }}
 
     runs-on: ${{ matrix.os }}
 
@@ -213,7 +213,7 @@ jobs:
     - name: Tests
       if: matrix.comp[0] == 'clang' && matrix.comp[1] == '18'
       run: |
-        if [[ '${{ needs.matrix.outputs.extended }}' == 'true' ]]; then
+        if [[ '${{ needs.build-matrix.outputs.extended }}' == 'true' ]]; then
           invoke test --extended
         else
           invoke test
@@ -221,7 +221,7 @@ jobs:
 
   build-python:
     # Run build python only when lint succeed
-    needs: [lint, matrix]
+    needs: [lint, build-matrix]
     if: inputs.build_python
 
     strategy:
@@ -229,7 +229,7 @@ jobs:
       matrix:
         os: [ubuntu-24.04]
         comp: [["clang", 18]]
-        include: ${{ fromJson(needs.matrix.outputs.incs) }}
+        include: ${{ fromJson(needs.build-matrix.outputs.incs) }}
 
     runs-on: ${{ matrix.os }}
 
