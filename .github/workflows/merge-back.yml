@@ -24,7 +24,7 @@ jobs:
         path: bg-ci
 
     - name: Install Python
-      uses: BigGeo-GIV/bg-ci/.github/actions/setup-python@erik/bump-dep-python
+      uses: BigGeo-GIV/bg-ci/.github/actions/setup-python@v4.x
 
     - name: Create merge-back PR
       env:
