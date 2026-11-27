@@ -141,8 +141,7 @@ jobs:
       with: { submodules: recursive }
 
     - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.12" }
+      uses: BigGeo-GIV/bg-ci/.github/actions/setup-python@v4.x
 
     - name: Install Poetry
       uses: snok/install-poetry@v1
@@ -259,8 +258,7 @@ jobs:
       with: { submodules: recursive }
 
     - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.12" }
+      uses: BigGeo-GIV/bg-ci/.github/actions/setup-python@v4.x
 
     - name: Install Poetry
       uses: snok/install-poetry@v1

@@ -18,8 +18,7 @@ jobs:
         token: ${{ secrets.GH_ACCESS }}
         submodules: recursive
 
-    - uses: actions/setup-python@v4
-      with: { python-version: "3.12" }
+    - uses: BigGeo-GIV/bg-ci/.github/actions/setup-python@v4.x
 
     - name: Install clang-format
       run: pip3 install clang-format==21.1.8

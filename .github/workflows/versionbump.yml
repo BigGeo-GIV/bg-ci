@@ -23,8 +23,7 @@ jobs:
         path: bg-ci
 
     - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.12" }
+      uses: BigGeo-GIV/bg-ci/.github/actions/setup-python@v4.x
 
     - name: Bump version
       env:
