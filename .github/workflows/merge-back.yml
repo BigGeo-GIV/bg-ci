@@ -24,8 +24,7 @@ jobs:
         path: bg-ci
 
     - name: Install Python
-      uses: actions/setup-python@v4
-      with: { python-version: "3.10" }
+      uses: BigGeo-GIV/bg-ci/.github/actions/setup-python@v4.x
 
     - name: Create merge-back PR
       env:
